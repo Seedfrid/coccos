@@ -1,0 +1,535 @@
+## Bureau de l'enfant — écran principal (remplace le dashboard à tuiles).
+## Un vrai bureau d'ordinateur en miniature :
+## - icônes d'applications sur le fond prairie (colonnes depuis le haut-gauche)
+## - barre des tâches en bas : bouton Menu (étoile), horloge, roue crantée (adulte)
+## - menu déroulant listant les mêmes applications
+## - fenêtres façon OS : une icône-catégorie (ex. « La souris ») ouvre une
+##   fenêtre déplaçable, fermable par sa croix, contenant les icônes des jeux
+## Les applications non développées ouvrent l'écran « Bientôt disponible ».
+extends Control
+
+const Fond := preload("res://scripts/fond.gd")
+const UIStyle := preload("res://scripts/ui_style.gd")
+const IconeBureau := preload("res://scripts/icone_bureau.gd")
+const Pictogramme := preload("res://scripts/pictogramme.gd")
+const Fenetre := preload("res://scripts/fenetre.gd")
+const PinConfig := preload("res://scripts/pin_config.gd")
+const AppliExternes := preload("res://scripts/applis_externes.gd")
+const CurseurOS := preload("res://scripts/effets/curseur.gd")
+const Etoile := preload("res://scripts/effets/etoile.gd")
+const Fleur := preload("res://scripts/effets/fleur.gd")
+const Anneau := preload("res://scripts/effets/anneau.gd")
+const Sons := preload("res://scripts/effets/sons.gd")
+const Lang := preload("res://scripts/lang.gd")
+const Tactile := preload("res://scripts/tactile.gd")
+const Migration := preload("res://scripts/migration.gd")
+
+## Registre des applications du bureau (id = pictogramme, sauf "picto" fourni).
+## "scene" = lancée directement ; "fenetre" = ouvre la fenêtre-catégorie du même
+## id ; "externe" = lance un programme installé (ajouté par _applis_bureau()).
+## Règle : AUCUNE icône fantôme — pas de stimuli inutiles. Les activités à
+## venir vivent dans la ROADMAP, pas sur le bureau de l'enfant.
+const APPLIS := [
+	{"id": "souris", "nom_cle": "bureau_categorie_souris", "couleur": Color(0.20, 0.60, 0.90), "fenetre": true},
+	{"id": "clavier", "nom_cle": "bureau_categorie_clavier", "couleur": Color(0.25, 0.75, 0.50), "fenetre": true},
+	{"id": "classeur", "nom_cle": "bureau_app_classeur", "couleur": Color(0.90, 0.40, 0.45), "scene": "res://scenes/classeur.tscn"},
+	{"id": "tele", "nom_cle": "bureau_app_tele", "couleur": Color(0.45, 0.40, 0.85), "scene": "res://scenes/tele.tscn"},
+]
+
+## Contenu des fenêtres-catégories : les jeux de la souris.
+const FENETRES := {
+	"souris": [
+		{"id": "pointeur", "nom_cle": "bureau_jeu_decouverte", "couleur": Color(0.20, 0.60, 0.90), "scene": "res://scenes/souris.tscn"},
+		{"id": "ballons", "nom_cle": "bureau_jeu_ballons", "couleur": Color(0.90, 0.30, 0.40), "scene": "res://scenes/ballons.tscn"},
+	],
+	"clavier": [
+		{"id": "lettres", "nom_cle": "bureau_jeu_lettres", "couleur": Color(0.25, 0.75, 0.50), "scene": "res://scenes/lettres.tscn"},
+		{"id": "mots", "nom_cle": "bureau_jeu_mots", "couleur": Color(0.95, 0.55, 0.15), "scene": "res://scenes/mots.tscn"},
+		{"id": "chasse", "nom_cle": "bureau_jeu_chasse", "couleur": Color(0.75, 0.35, 0.75), "scene": "res://scenes/chasse.tscn"},
+	],
+}
+
+const HAUTEUR_BARRE := 76
+const COULEUR_BARRE := Color(0.13, 0.17, 0.28, 0.92)
+const COULEUR_MENU := Color(0.95, 0.72, 0.15)  # bouton Menu jaune soleil
+const COULEUR_ENGRENAGE := Color(0.45, 0.45, 0.50)
+
+# Retours sensoriels du bureau (réglages adulte, section Souris)
+const PAS_TRAINEE := 26.0
+const COULEURS_TRAINEE: Array[Color] = [
+	Color(1.0, 0.9, 0.35), Color(1.0, 1.0, 1.0), Color(1.0, 0.75, 0.25),
+]
+const COULEURS_ETOILES: Array[Color] = [
+	Color(1.0, 0.85, 0.25), Color(1.0, 0.6, 0.15), Color(1.0, 0.95, 0.6), Color(1.0, 1.0, 1.0),
+]
+const COULEURS_FLEURS: Array[Color] = [
+	Color(1.0, 0.45, 0.7), Color(0.8, 0.5, 0.95), Color(0.5, 0.6, 1.0), Color(1.0, 0.6, 0.85),
+]
+
+var _menu: PanelContainer
+var _horloge: Label
+var _fenetres_ouvertes := {}  # id catégorie → instance de Fenetre
+
+var _curseur: Node2D
+var _calque_effets: Node2D
+var _trainee_active := true
+var _anim_gauche := true
+var _anim_droit := true
+var _sons_clics := true
+var _lecteurs := {}
+var _dernier_point := Vector2.ZERO
+var _distance_cumulee := 0.0
+
+
+func _ready() -> void:
+	# AVANT toute lecture de config : rapatrier les données de l'ancien nom
+	# d'application (« GCompris 2 » → « CoccOs ») si c'est le premier lancement
+	Migration.migrer()
+	# Plein écran au lancement (réglages adulte → Interface)
+	if DisplayServer.get_name() != "headless" \
+			and PinConfig.lire_option("interface", "plein_ecran", false):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	_appliquer_fond_bureau()
+	_creer_icones()
+	_creer_barre_taches()
+	_creer_menu()
+	_mettre_a_jour_horloge()
+	_creer_curseur_et_effets()
+
+
+## Fond d'écran du bureau : image prairie (défaut), image importée par l'adulte
+## ou couleur unie — réglages adulte → Interface. Les jeux gardent la prairie.
+func _appliquer_fond_bureau() -> void:
+	match PinConfig.lire_option("interface", "fond_bureau_type", "image"):
+		"couleur":
+			var fond := ColorRect.new()
+			fond.color = PinConfig.lire_option("interface", "fond_bureau_couleur", Color(0.55, 0.75, 0.55))
+			fond.set_anchors_preset(Control.PRESET_FULL_RECT)
+			fond.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			add_child(fond)
+		"perso":
+			_appliquer_fond_perso()
+		_:
+			Fond.appliquer(self)
+
+
+## Fond importé (user://fond_bureau_perso.png) — repli sur la prairie si absent/illisible.
+func _appliquer_fond_perso() -> void:
+	const CHEMIN_FOND_PERSO := "user://fond_bureau_perso.png"
+	if not FileAccess.file_exists(CHEMIN_FOND_PERSO):
+		Fond.appliquer(self)
+		return
+	var image := Image.load_from_file(CHEMIN_FOND_PERSO)
+	if image == null or image.is_empty():
+		Fond.appliquer(self)
+		return
+	# Repli couleur derrière (même filet de sécurité que fond.gd)
+	var base := ColorRect.new()
+	base.color = Color(0.90, 0.94, 0.86)
+	base.set_anchors_preset(Control.PRESET_FULL_RECT)
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(base)
+	var affichage := TextureRect.new()
+	affichage.texture = ImageTexture.create_from_image(image)
+	affichage.set_anchors_preset(Control.PRESET_FULL_RECT)
+	affichage.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	affichage.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	affichage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(affichage)
+
+
+## Le curseur de l'OS + les retours sensoriels du bureau (réglages adulte).
+## CanvasLayers : les effets (5) et le curseur (10) restent au-dessus de tout,
+## y compris des fenêtres ouvertes ensuite.
+func _creer_curseur_et_effets() -> void:
+	_trainee_active = PinConfig.lire_option("souris", "trainee_bureau", true)
+	_anim_gauche = PinConfig.lire_option("souris", "anim_clic_gauche_bureau", true)
+	_anim_droit = PinConfig.lire_option("souris", "anim_clic_droit_bureau", true)
+	_sons_clics = PinConfig.lire_option("souris", "sons_clics_bureau", true)
+
+	# Sons des clics (pairing imaginaire Freddy : pop ↔ fleurs, carillon ↔ étoiles),
+	# un peu plus doux que dans les jeux — c'est le bureau
+	var flux := {"etoiles": Sons.carillon(), "fleurs": Sons.pop_joyeux()}
+	for nom in flux:
+		var lecteur := AudioStreamPlayer.new()
+		lecteur.stream = flux[nom]
+		lecteur.volume_db = -6.0
+		lecteur.max_polyphony = 3
+		add_child(lecteur)
+		_lecteurs[nom] = lecteur
+
+	var couche_effets := CanvasLayer.new()
+	couche_effets.layer = 5
+	add_child(couche_effets)
+	_calque_effets = Node2D.new()
+	couche_effets.add_child(_calque_effets)
+
+	var couche_curseur := CanvasLayer.new()
+	couche_curseur.layer = 10
+	add_child(couche_curseur)
+	_curseur = CurseurOS.new()
+	couche_curseur.add_child(_curseur)
+
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	_dernier_point = get_viewport().get_mouse_position()
+	_curseur.position = _dernier_point
+
+	# Mode tactile : l'appui long vaut clic droit (étoiles + carillon, selon réglages)
+	var tactile: Node = Tactile.new()
+	add_child(tactile)
+	tactile.appui_long.connect(func(ou: Vector2) -> void:
+		_curseur.pulser()
+		if _anim_droit:
+			_animation_etoiles(ou)
+		if _sons_clics:
+			_lecteurs["etoiles"].play())
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		_curseur.position = event.position
+		if _trainee_active:
+			_distance_cumulee += event.position.distance_to(_dernier_point)
+			if _distance_cumulee >= PAS_TRAINEE:
+				_distance_cumulee = 0.0
+				_poser_etoile(
+					event.position + Vector2(randf_range(-10, 10), randf_range(-10, 10)),
+					COULEURS_TRAINEE.pick_random(), randf_range(13, 19),
+					Vector2(0, randf_range(20, 60)), 60.0, randf_range(0.5, 0.8))
+		_dernier_point = event.position
+	elif event is InputEventMouseButton and event.pressed:
+		# Inversion 2026-07-07 : gauche = fleurs + pop, droit = étoiles + carillon
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_curseur.pulser()
+			if _anim_gauche:
+				_animation_fleurs(event.position)
+			if _sons_clics:
+				_lecteurs["fleurs"].play()  # pop joyeux — le son des fleurs
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_curseur.pulser()
+			if _anim_droit:
+				_animation_etoiles(event.position)
+			if _sons_clics:
+				_lecteurs["etoiles"].play()  # carillon — le son des étoiles
+
+
+## Version « bureau » de l'explosion d'étoiles — plus légère que dans le jeu.
+func _animation_etoiles(ou: Vector2) -> void:
+	var anneau: Node2D = Anneau.new()
+	anneau.position = ou
+	anneau.couleur = Color(1.0, 0.85, 0.3)
+	anneau.rayon_max = 60.0
+	_calque_effets.add_child(anneau)
+	for i in 8:
+		var direction := Vector2.from_angle(randf() * TAU)
+		_poser_etoile(ou, COULEURS_ETOILES.pick_random(), randf_range(14, 22),
+			direction * randf_range(140, 320), 480.0, randf_range(0.5, 0.8))
+
+
+## Version « bureau » de la ronde de fleurs — plus légère que dans le jeu.
+func _animation_fleurs(ou: Vector2) -> void:
+	for i in 4:
+		var angle := TAU * float(i) / 4.0 + randf_range(-0.3, 0.3)
+		var fleur: Node2D = Fleur.new()
+		fleur.position = ou + Vector2.from_angle(angle) * randf_range(30, 50)
+		fleur.couleur = COULEURS_FLEURS.pick_random()
+		fleur.rayon = randf_range(10, 15)
+		fleur.delai = 0.05 * float(i)
+		_calque_effets.add_child(fleur)
+
+
+func _poser_etoile(ou: Vector2, couleur: Color, rayon: float,
+		vitesse: Vector2, gravite: float, duree_vie: float) -> void:
+	var etoile: Node2D = Etoile.new()
+	etoile.position = ou
+	etoile.couleur = couleur
+	etoile.rayon = rayon
+	etoile.vitesse = vitesse
+	etoile.gravite = gravite
+	etoile.rotation_vitesse = randf_range(-6.0, 6.0)
+	etoile.duree_vie = duree_vie
+	_calque_effets.add_child(etoile)
+
+
+# --- Icônes du bureau -------------------------------------------------------
+
+## Liste réelle du bureau : catégories + applications externes cochées/installées.
+## La télé n'existe pas sur le web (pas de fichiers) — aucune icône fantôme.
+func _applis_bureau() -> Array:
+	var liste := APPLIS.duplicate()
+	if OS.has_feature("web"):
+		liste = liste.filter(func(appli: Dictionary) -> bool: return appli["id"] != "tele")
+	liste.append_array(AppliExternes.applis_actives())
+	return liste
+
+
+func _creer_icones() -> void:
+	var par_colonne := 3
+	var premiere: Control = null
+	var applis := _applis_bureau()
+	for i in applis.size():
+		var appli: Dictionary = applis[i]
+		var icone: Control = IconeBureau.new()
+		icone.id = appli["id"]
+		icone.nom = Lang.t(appli["nom_cle"])
+		icone.couleur = appli["couleur"]
+		icone.picto = appli.get("picto", "")
+		icone.est_dossier = appli.has("fenetre")  # catégorie = icône dossier
+		@warning_ignore("integer_division")
+		icone.position = Vector2(30 + (i / par_colonne) * 180, 26 + (i % par_colonne) * 178)
+		icone.lancee.connect(_lancer_appli)
+		add_child(icone)
+		if premiere == null:
+			premiere = icone
+	# Focus clavier initial sur la première icône (accessibilité)
+	if premiere != null:
+		premiere.ready.connect(premiere.focus, CONNECT_ONE_SHOT | CONNECT_DEFERRED)
+
+
+func _lancer_appli(id: String) -> void:
+	if _menu != null:
+		_menu.visible = false
+	for appli in _applis_bureau():
+		if appli["id"] == id:
+			if appli.has("externe"):
+				_lancer_externe(appli)
+			elif appli.has("scene"):
+				# Curseur système rendu visible (les jeux le remasquent eux-mêmes)
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				get_tree().change_scene_to_file(appli["scene"])
+			elif appli.has("fenetre"):
+				_ouvrir_fenetre(id, Lang.t(appli["nom_cle"]), appli["couleur"])
+			return
+
+
+## Lance une application externe (TuxPaint…) — elle s'ouvre par-dessus le
+## bureau ; à sa fermeture, l'enfant retrouve le bureau tel quel.
+## Multi-plateforme : AppliExternes.lancer choisit le bon geste
+## (processus Linux, intent Android).
+func _lancer_externe(appli: Dictionary) -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE  # l'appli externe a son propre curseur
+	if not AppliExternes.lancer(appli):
+		push_warning("Impossible de lancer : " + String(appli["id"]))
+	# Le curseur du bureau reste utilisable en attendant / au retour
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
+
+## Lance un jeu depuis une fenêtre-catégorie.
+func _lancer_jeu(id: String) -> void:
+	for categorie in FENETRES:
+		for jeu in FENETRES[categorie]:
+			if jeu["id"] == id:
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				get_tree().change_scene_to_file(jeu["scene"])
+				return
+
+
+# --- Fenêtres-catégories ------------------------------------------------------
+
+## Ouvre (ou remet devant) la fenêtre d'une catégorie, avec ses icônes de jeux.
+func _ouvrir_fenetre(id: String, titre: String, couleur: Color) -> void:
+	# Déjà ouverte → juste la remettre au premier plan
+	if _fenetres_ouvertes.has(id) and is_instance_valid(_fenetres_ouvertes[id]):
+		move_child(_fenetres_ouvertes[id], get_child_count() - 1)
+		return
+
+	var fenetre: PanelContainer = Fenetre.new()
+	fenetre.titre = titre
+	fenetre.couleur = couleur
+	fenetre.limite_basse = HAUTEUR_BARRE
+	# Réglage adulte : fenêtres fixes par défaut, déplaçables si l'option est cochée
+	fenetre.deplacable = PinConfig.lire_option("bureau", "fenetres_deplacables", false)
+	add_child(fenetre)  # dernier enfant = dessiné au-dessus du reste
+	_fenetres_ouvertes[id] = fenetre
+
+	for jeu in FENETRES[id]:
+		var icone: Control = IconeBureau.new()
+		icone.id = jeu["id"]
+		icone.nom = Lang.t(jeu["nom_cle"])
+		icone.couleur = jeu["couleur"]
+		icone.lancee.connect(_lancer_jeu)
+		fenetre.contenu.add_child(icone)
+
+	# Centrage différé : la taille n'est connue qu'après le premier calcul de layout
+	fenetre.position = Vector2.ZERO
+	_centrer_fenetre.call_deferred(fenetre)
+
+
+func _centrer_fenetre(fenetre: Control) -> void:
+	fenetre.position = ((size - Vector2(0, HAUTEUR_BARRE)) - fenetre.size) / 2.0
+
+
+# --- Barre des tâches -------------------------------------------------------
+
+func _creer_barre_taches() -> void:
+	var barre := PanelContainer.new()
+	barre.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	barre.offset_top = -HAUTEUR_BARRE
+	var style := StyleBoxFlat.new()
+	style.bg_color = COULEUR_BARRE
+	barre.add_theme_stylebox_override("panel", style)
+	add_child(barre)
+
+	var marge := MarginContainer.new()
+	marge.add_theme_constant_override("margin_left", 12)
+	marge.add_theme_constant_override("margin_right", 12)
+	marge.add_theme_constant_override("margin_top", 8)
+	marge.add_theme_constant_override("margin_bottom", 8)
+	barre.add_child(marge)
+
+	var ligne := HBoxContainer.new()
+	ligne.add_theme_constant_override("separation", 16)
+	marge.add_child(ligne)
+
+	# Bouton Menu (étoile + texte), à gauche comme un vrai bureau
+	var btn_menu := Button.new()
+	btn_menu.text = Lang.t("bureau_menu")
+	btn_menu.custom_minimum_size = Vector2(180, 0)
+	btn_menu.add_theme_font_size_override("font_size", 30)
+	UIStyle.styliser(btn_menu, COULEUR_MENU, 18)
+	for etat in ["normal", "hover", "focus", "pressed"]:
+		var s: StyleBoxFlat = btn_menu.get_theme_stylebox(etat)
+		s.content_margin_left = 62.0
+	var picto_menu: Control = Pictogramme.new()
+	picto_menu.id = "etoile"
+	picto_menu.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	picto_menu.offset_left = 10
+	picto_menu.offset_right = 54
+	picto_menu.offset_top = 8
+	picto_menu.offset_bottom = -8
+	btn_menu.add_child(picto_menu)
+	btn_menu.pressed.connect(_basculer_menu)
+	ligne.add_child(btn_menu)
+
+	# Espace extensible entre le menu (gauche) et l'horloge/réglages (droite)
+	var espace := Control.new()
+	espace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ligne.add_child(espace)
+
+	# Horloge numérique — l'enfant voit l'heure vivre
+	_horloge = Label.new()
+	_horloge.add_theme_font_size_override("font_size", 34)
+	_horloge.add_theme_color_override("font_color", Color.WHITE)
+	ligne.add_child(_horloge)
+	var minuterie := Timer.new()
+	minuterie.wait_time = 1.0
+	minuterie.timeout.connect(_mettre_a_jour_horloge)
+	add_child(minuterie)
+	minuterie.start()
+
+	# Roue crantée (réglages adulte) — reprend le parcours PIN existant
+	var btn_reglages := Button.new()
+	btn_reglages.custom_minimum_size = Vector2(60, 60)
+	UIStyle.styliser(btn_reglages, COULEUR_ENGRENAGE, 30)
+	var picto_reglages: Control = Pictogramme.new()
+	picto_reglages.id = "engrenage"
+	picto_reglages.couleur_creux = COULEUR_ENGRENAGE
+	picto_reglages.set_anchors_preset(Control.PRESET_FULL_RECT)
+	picto_reglages.offset_left = 10
+	picto_reglages.offset_top = 10
+	picto_reglages.offset_right = -10
+	picto_reglages.offset_bottom = -10
+	btn_reglages.add_child(picto_reglages)
+	btn_reglages.pressed.connect(_aller_reglages)
+	ligne.add_child(btn_reglages)
+
+	# Bouton éteindre (quitte l'OS) — symbole marche/arrêt, tout à droite
+	var btn_eteindre := Button.new()
+	btn_eteindre.custom_minimum_size = Vector2(60, 60)
+	UIStyle.styliser(btn_eteindre, Color(0.75, 0.25, 0.22), 30)
+	var picto_eteindre: Control = Pictogramme.new()
+	picto_eteindre.id = "eteindre"
+	picto_eteindre.set_anchors_preset(Control.PRESET_FULL_RECT)
+	picto_eteindre.offset_left = 14
+	picto_eteindre.offset_top = 14
+	picto_eteindre.offset_right = -14
+	picto_eteindre.offset_bottom = -14
+	btn_eteindre.add_child(picto_eteindre)
+	btn_eteindre.pressed.connect(_eteindre)
+	ligne.add_child(btn_eteindre)
+
+
+func _mettre_a_jour_horloge() -> void:
+	var heure := Time.get_time_dict_from_system()
+	_horloge.text = "%02d:%02d" % [heure["hour"], heure["minute"]]
+
+
+func _aller_reglages() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	get_tree().change_scene_to_file("res://scenes/pin_gate.tscn")
+
+
+## Quitte l'OS (bouton éteindre de la barre des tâches).
+## Si le réglage « éteindre sous PIN » est actif (Réglages → Interface),
+## l'écran du code adulte s'ouvre d'abord — il éteindra après un code correct.
+## Sur le web, quit() figerait la page : on retourne au site vitrine à la place
+## (le jeu est servi dans jeu/, la page d'accueil est juste au-dessus).
+func _eteindre() -> void:
+	if PinConfig.lire_option("interface", "eteindre_sous_pin", false):
+		var PinGate := preload("res://scripts/pin_gate.gd")
+		PinGate.action_apres = "eteindre"
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_tree().change_scene_to_file("res://scenes/pin_gate.tscn")
+		return
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.location.href = '../';")
+	else:
+		get_tree().quit()
+
+
+# --- Menu des applications --------------------------------------------------
+
+func _creer_menu() -> void:
+	_menu = PanelContainer.new()
+	_menu.visible = false
+	_menu.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_menu.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_menu.offset_left = 12
+	_menu.offset_bottom = -(HAUTEUR_BARRE + 10)
+	var style := StyleBoxFlat.new()
+	style.bg_color = COULEUR_BARRE
+	style.set_corner_radius_all(18)
+	_menu.add_theme_stylebox_override("panel", style)
+	add_child(_menu)
+
+	var marge := MarginContainer.new()
+	for cote in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		marge.add_theme_constant_override(cote, 14)
+	_menu.add_child(marge)
+
+	var colonne := VBoxContainer.new()
+	colonne.add_theme_constant_override("separation", 10)
+	marge.add_child(colonne)
+
+	var titre := Label.new()
+	titre.text = Lang.t("bureau_menu_titre")
+	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titre.add_theme_font_size_override("font_size", 26)
+	titre.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
+	colonne.add_child(titre)
+
+	for appli in _applis_bureau():
+		var btn := Button.new()
+		btn.text = Lang.t(appli["nom_cle"])
+		btn.custom_minimum_size = Vector2(280, 62)
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.add_theme_font_size_override("font_size", 28)
+		UIStyle.styliser(btn, appli["couleur"], 14)
+		for etat in ["normal", "hover", "focus", "pressed"]:
+			var s: StyleBoxFlat = btn.get_theme_stylebox(etat)
+			s.content_margin_left = 66.0
+		var picto: Control = Pictogramme.new()
+		picto.id = appli.get("picto", appli["id"])
+		picto.couleur_creux = (appli["couleur"] as Color).darkened(0.25)
+		picto.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+		picto.offset_left = 12
+		picto.offset_right = 56
+		picto.offset_top = 9
+		picto.offset_bottom = -9
+		btn.add_child(picto)
+		btn.pressed.connect(_lancer_appli.bind(appli["id"]))
+		colonne.add_child(btn)
+
+
+func _basculer_menu() -> void:
+	_menu.visible = not _menu.visible

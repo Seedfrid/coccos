@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CoccOs — textes de l'interface, langue française.
+     Traduire = dupliquer le dossier lang/fr/ en lang/<code>/ et traduire les
+     valeurs ci-dessous (les clés ne changent JAMAIS). Voir DOCS/specs/spec-lang.md.
+     Éviter les caractères & < > dans les valeurs. -->
+<langue code="fr" nom="Français">
+
+	<!-- ═══ Bureau de l'enfant ═══ -->
+	<texte cle="bureau_menu">Menu</texte>
+	<texte cle="bureau_menu_titre">Les jeux</texte>
+	<texte cle="bureau_categorie_souris">La souris</texte>
+	<texte cle="bureau_categorie_clavier">Le clavier</texte>
+	<texte cle="bureau_jeu_decouverte">Découverte</texte>
+	<texte cle="bureau_jeu_ballons">Les ballons</texte>
+	<texte cle="bureau_jeu_lettres">Les lettres</texte>
+	<texte cle="bureau_jeu_mots">Les mots</texte>
+	<texte cle="bureau_jeu_chasse">La chasse</texte>
+	<texte cle="bureau_app_classeur">Mon classeur</texte>
+	<texte cle="bureau_app_tele">Ma télé</texte>
+	<texte cle="bureau_app_dessin">Dessin</texte>
+	<texte cle="bureau_app_gcompris">GCompris</texte>
+	<texte cle="bureau_app_maths">Les maths</texte>
+
+	<!-- ═══ Écran « Bientôt disponible » ═══ -->
+	<texte cle="placeholder_message">Bientôt disponible :)</texte>
+	<texte cle="placeholder_retour">Retour</texte>
+
+	<!-- ═══ Code PIN (accès adulte) ═══ -->
+	<texte cle="pin_titre_reglages">Accès réglages (adulte)</texte>
+	<texte cle="pin_titre_eteindre">Éteindre — code adulte</texte>
+	<texte cle="pin_titre_classeur">Modifier le classeur — code adulte</texte>
+	<texte cle="pin_aide_defaut">Code par défaut : 1234 — pensez à le changer dans les réglages</texte>
+	<texte cle="pin_erreur">Code incorrect</texte>
+	<texte cle="pin_effacer">Effacer</texte>
+	<texte cle="pin_valider">OK</texte>
+	<texte cle="pin_retour">Retour</texte>
+
+	<!-- ═══ Changement du code PIN ═══ -->
+	<texte cle="chpin_titre_nouveau">Choisis un nouveau code</texte>
+	<texte cle="chpin_titre_confirme">Confirme le nouveau code</texte>
+	<texte cle="chpin_annuler">Annuler</texte>
+	<texte cle="chpin_erreur_4_chiffres">Le code doit faire 4 chiffres</texte>
+	<texte cle="chpin_succes">Code modifié !</texte>
+	<texte cle="chpin_erreur_differents">Les deux codes ne correspondent pas</texte>
+
+	<!-- ═══ Hub des réglages adulte ═══ -->
+	<texte cle="reglages_titre">Réglages (adulte)</texte>
+	<texte cle="reglages_info">Profils enfants, progression et suivi arriveront ici.</texte>
+	<texte cle="reglages_souris">Réglages de la souris</texte>
+	<texte cle="reglages_clavier">Réglages du clavier</texte>
+	<texte cle="reglages_interface">Réglages de l'interface</texte>
+	<texte cle="reglages_applis">Applications externes</texte>
+	<texte cle="reglages_classeur">Classeur de communication</texte>
+	<texte cle="reglages_tele">Télé de l'enfant</texte>
+	<texte cle="reglages_espace">Espace famille</texte>
+	<texte cle="reglages_changer_pin">Changer le code PIN</texte>
+	<texte cle="reglages_retour_bureau">Retour au bureau</texte>
+	<texte cle="reglages_retour">Retour aux réglages</texte>
+
+	<!-- ═══ Réglages — Souris ═══ -->
+	<texte cle="souris_titre">Réglages — Souris</texte>
+	<texte cle="souris_retours">Retours sensoriels du bureau</texte>
+	<texte cle="souris_case_trainee">Traînée d'étoiles sur le bureau</texte>
+	<texte cle="souris_case_clic_gauche">Animation du clic gauche (fleurs)</texte>
+	<texte cle="souris_case_clic_droit">Animation du clic droit (étoiles)</texte>
+	<texte cle="souris_case_sons">Sons des clics sur le bureau</texte>
+	<texte cle="souris_taille">Taille du pointeur (bureau et jeux)</texte>
+	<texte cle="souris_taille_petit">Petit</texte>
+	<texte cle="souris_taille_moyen">Moyen</texte>
+	<texte cle="souris_taille_grand">Grand</texte>
+	<texte cle="souris_forme">Forme du pointeur (bureau et jeux)</texte>
+	<texte cle="souris_forme_fleche">Flèche</texte>
+	<texte cle="souris_forme_main">Main</texte>
+	<texte cle="souris_forme_abeille">Abeille</texte>
+	<texte cle="souris_forme_coccinelle">Coccinelle</texte>
+	<texte cle="souris_vitesse">Vitesse du pointeur (bureau et jeux)</texte>
+	<texte cle="souris_vitesse_note">100 % = vitesse normale de l'ordinateur · sans effet sur la version web</texte>
+
+	<!-- ═══ Réglages — Interface ═══ -->
+	<texte cle="interface_titre">Réglages — Interface</texte>
+	<texte cle="interface_fenetres_deplacables">Fenêtres déplaçables par l'enfant</texte>
+	<texte cle="interface_plein_ecran">Plein écran au lancement</texte>
+	<texte cle="interface_pin_eteindre">Protéger le bouton éteindre par le code PIN</texte>
+	<texte cle="interface_mode_tactile">Mode écran tactile (appui long = clic droit, clavier virtuel)</texte>
+	<texte cle="interface_couleur_fenetres">Couleur des fenêtres</texte>
+	<texte cle="interface_barre">Barre :</texte>
+	<texte cle="interface_fond">Fond :</texte>
+	<texte cle="interface_couleur_barre_titre">Couleur de la barre des fenêtres</texte>
+	<texte cle="interface_couleur_fond_titre">Couleur du fond des fenêtres</texte>
+	<texte cle="interface_couleurs_origine">Couleurs d'origine</texte>
+	<texte cle="interface_msg_origine">Couleurs d'origine restaurées.</texte>
+	<texte cle="interface_fond_bureau">Fond d'écran du bureau</texte>
+	<texte cle="interface_btn_prairie">Image prairie</texte>
+	<texte cle="interface_btn_importer">Importer une image…</texte>
+	<texte cle="interface_ou_couleur">ou une couleur :</texte>
+	<texte cle="interface_couleur_bureau_titre">Couleur du fond d'écran</texte>
+	<texte cle="interface_msg_prairie">Fond d'écran : image prairie.</texte>
+	<texte cle="interface_msg_couleur">Fond d'écran : couleur unie.</texte>
+	<texte cle="interface_valider">Valider</texte>
+	<texte cle="interface_annuler">Annuler</texte>
+	<texte cle="interface_import_titre">Choisir une image de fond d'écran</texte>
+	<texte cle="interface_filtre_images">Images</texte>
+	<texte cle="interface_msg_illisible">Image illisible :</texte>
+	<texte cle="interface_msg_enregistrement">Impossible d'enregistrer l'image.</texte>
+	<texte cle="interface_msg_importe">Fond d'écran importé :</texte>
+
+	<!-- ═══ Réglages — Applications externes ═══ -->
+	<texte cle="applis_titre">Réglages — Applications externes</texte>
+	<texte cle="applis_info">Les applications cochées apparaissent sur le bureau de l'enfant.</texte>
+	<texte cle="applis_desc_tuxpaint">TuxPaint — dessin pour enfants</texte>
+	<texte cle="applis_desc_gcompris">GCompris — activités éducatives</texte>
+	<texte cle="applis_desc_tuxmath">TuxMath — calcul mental</texte>
+	<texte cle="applis_statut_installee">installée</texte>
+	<texte cle="applis_statut_non_installee">non installée</texte>
+	<texte cle="applis_btn_installer">Installer</texte>
+	<texte cle="applis_statut_logitheque">logithèque ouverte — revenir ici après l'installation</texte>
+	<texte cle="applis_statut_play_store">fiche Play Store ouverte — revenir ici après l'installation</texte>
+	<texte cle="applis_statut_en_cours">installation en cours…</texte>
+	<texte cle="applis_statut_echec">installation non terminée</texte>
+
+	<!-- ═══ Réglages — Classeur de communication ═══ -->
+	<texte cle="classeur_categories">Catégories (une catégorie = une plaquette)</texte>
+	<texte cle="classeur_nouvelle_categorie">nom de la nouvelle catégorie…</texte>
+	<texte cle="classeur_btn_creer">Créer</texte>
+	<texte cle="classeur_btn_supprimer">Supprimer</texte>
+	<texte cle="classeur_btn_confirmer">Confirmer ?</texte>
+	<texte cle="classeur_vignettes">Vignettes (la banque complète)</texte>
+	<texte cle="classeur_vignettes_info">Toucher une vignette pour la modifier — une vignette peut servir plusieurs catégories.</texte>
+	<texte cle="classeur_nouvelle_vignette">Nouvelle vignette (importer une image)</texte>
+	<texte cle="classeur_mot">le mot dit par la voix…</texte>
+	<texte cle="classeur_btn_enregistrer">Enregistrer</texte>
+	<texte cle="classeur_btn_fermer">Fermer</texte>
+	<texte cle="classeur_importer_plaquette">Importer une plaquette TLAb (SVG)</texte>
+	<texte cle="classeur_import_existe">cette catégorie existe déjà — renommer le fichier ou supprimer la catégorie d'abord</texte>
+	<texte cle="classeur_import_illisible">fichier illisible — est-ce bien un export SVG de TLAb ?</texte>
+
+	<!-- ═══ Ma télé + Réglages — Télé ═══ -->
+	<texte cle="tele_mur_vide">La télé est vide — un adulte peut ajouter des vidéos dans les réglages.</texte>
+	<texte cle="tele_info">Les vidéos ajoutées ici font le mur de « Ma télé » — rien d'autre n'y apparaît. Le nom fait le titre et l'ordre (préfixer 01, 02… pour ordonner).</texte>
+	<texte cle="tele_btn_importer">Importer une vidéo (conversion automatique)</texte>
+	<texte cle="tele_btn_deposer_ogv">Ajouter une vidéo convertie (.ogv)</texte>
+	<texte cle="tele_note_android">Sur Android, les vidéos doivent être converties d'abord sur l'ordinateur (Réglages → Télé), puis transférées. En dépannage : un convertisseur en ligne vers le format OGV.</texte>
+	<texte cle="tele_conversion_en_cours">conversion en cours…</texte>
+	<texte cle="tele_import_echec">import non abouti — vérifier le fichier</texte>
+	<texte cle="tele_ffmpeg_absent">Le convertisseur vidéo (ffmpeg) n'est pas installé.</texte>
+	<texte cle="tele_ffmpeg_windows">Le convertisseur (ffmpeg.exe) manque à côté de CoccOs — réinstaller CoccOs le remet en place.</texte>
+	<texte cle="tele_btn_installer_ffmpeg">Installer le convertisseur (ffmpeg)</texte>
+
+	<!-- ═══ Réglages — Espace famille ═══ -->
+	<texte cle="espace_info">Le même CoccOs partout : réglages, classeur et voix voyagent entre vos appareils grâce au code famille. Aucune donnée personnelle — le code est la seule clé, notez-le précieusement. Les vidéos de la télé ne voyagent pas.</texte>
+	<texte cle="espace_btn_creer">Créer un espace famille</texte>
+	<texte cle="espace_champ_code">code famille reçu (mots-tirets-nombre)…</texte>
+	<texte cle="espace_btn_rejoindre">Rejoindre</texte>
+	<texte cle="espace_note_code">Votre code famille — notez-le : il est la seule clé de votre espace.</texte>
+	<texte cle="espace_btn_envoyer">Envoyer sur l'espace (remplace l'espace en ligne)</texte>
+	<texte cle="espace_btn_recuperer">Récupérer de l'espace (remplace les données locales)</texte>
+	<texte cle="espace_btn_oublier">Oublier le code sur cet appareil</texte>
+	<texte cle="espace_envoi_en_cours">envoi en cours…</texte>
+	<texte cle="espace_recuperation_en_cours">récupération en cours…</texte>
+	<texte cle="espace_envoye">Envoyé — l'espace en ligne est à jour.</texte>
+	<texte cle="espace_recupere">Récupéré — cet appareil est à jour (l'état précédent est conservé dans la sauvegarde).</texte>
+	<texte cle="espace_vide">L'espace est encore vide — faire « Envoyer » depuis l'appareil qui a les données.</texte>
+	<texte cle="espace_echec_reseau">Impossible de joindre l'espace — vérifier la connexion et réessayer.</texte>
+	<texte cle="espace_echec_archive">Archive illisible — réessayer un envoi depuis l'appareil source.</texte>
+	<texte cle="espace_trop_gros">L'espace dépasse 50 Mo — alléger (voix ou images) avant d'envoyer.</texte>
+	<texte cle="espace_url_titre">Adresse de l'espace en ligne :</texte>
+	<texte cle="wifi_btn_envoyer">Envoyer en wifi (vers un appareil du foyer)</texte>
+	<texte cle="wifi_btn_recuperer">Récupérer en wifi (depuis un appareil du foyer)</texte>
+	<texte cle="wifi_annuler">Annuler la synchro wifi</texte>
+	<texte cle="wifi_en_cours">Recherche de l'autre appareil sur le wifi… (faire le geste opposé sur l'autre appareil)</texte>
+	<texte cle="wifi_envoye">Envoyé en wifi — l'autre appareil est à jour.</texte>
+	<texte cle="wifi_personne">Aucun appareil de la famille trouvé — vérifier que l'autre appareil est sur le même wifi et fait le geste opposé.</texte>
+	<texte cle="wifi_interrompu">Transfert interrompu — réessayer.</texte>
+	<texte cle="wifi_port_occupe">La synchro wifi est déjà utilisée par une autre application — réessayer dans un instant.</texte>
+
+	<!-- ═══ Réglages — Clavier ═══ -->
+	<texte cle="clavier_titre">Réglages — Clavier</texte>
+	<texte cle="clavier_mots_titre">Mots à apprendre (jeu « Les mots »)</texte>
+	<texte cle="clavier_mot_placeholder">Nouveau mot…</texte>
+	<texte cle="clavier_ajouter">＋ Ajouter</texte>
+	<texte cle="clavier_retirer">- Retirer</texte>
+	<texte cle="clavier_voix_note">La voix des lettres est celle du système (choix de la voix : à venir).</texte>
+
+	<!-- ═══ Noms parlés des caractères spéciaux (jeu Les lettres) ═══ -->
+	<texte cle="car_espace">espace</texte>
+	<texte cle="car_point">point</texte>
+	<texte cle="car_virgule">virgule</texte>
+	<texte cle="car_exclamation">point d'exclamation</texte>
+	<texte cle="car_interrogation">point d'interrogation</texte>
+	<texte cle="car_apostrophe">apostrophe</texte>
+	<texte cle="car_tiret">tiret</texte>
+	<texte cle="car_deux_points">deux points</texte>
+	<texte cle="car_point_virgule">point virgule</texte>
+	<texte cle="car_parenthese">parenthèse</texte>
+	<texte cle="car_guillemet">guillemet</texte>
+	<texte cle="car_barre">barre</texte>
+	<texte cle="car_plus">plus</texte>
+	<texte cle="car_egal">égal</texte>
+	<texte cle="car_etoile">étoile</texte>
+	<texte cle="car_arobase">arobase</texte>
+	<texte cle="car_tiret_bas">tiret bas</texte>
+	<texte cle="car_et_commercial">et commercial</texte>
+	<texte cle="car_euro">euro</texte>
+	<texte cle="car_dollar">dollar</texte>
+	<texte cle="car_pour_cent">pour cent</texte>
+	<texte cle="car_diese">dièse</texte>
+	<texte cle="car_inferieur">inférieur</texte>
+	<texte cle="car_superieur">supérieur</texte>
+
+</langue>

@@ -1,0 +1,24 @@
+Voix enregistrées — CoccOs
+==========================
+
+Déposez ici des enregistrements audio (.wav, .ogg ou .mp3) : ils remplacent
+automatiquement la synthèse vocale. Le NOM DU FICHIER est le terme prononcé,
+tel qu'il s'affiche dans le jeu :
+
+  chiffres/   les nombres tels qu'affichés     ex. 1.wav, 2.wav, 12.wav
+  lettres/    les lettres en majuscule          ex. A.wav, B.wav, É.wav
+  mots/       les mots à apprendre              ex. ISABELLA.wav, PAPA.wav
+  phrases/    les noms de caractères et phrases ex. point d'exclamation.wav
+
+Deux emplacements possibles :
+1. ICI (embarqué dans l'application — ouvrir le projet dans l'éditeur Godot
+   une fois après l'ajout, puis reconstruire les exports).
+2. SANS reconstruire : dans le dossier utilisateur de l'application,
+   ~/.local/share/godot/app_userdata/<nom de l'appli>/lang/fr/voix/…
+   → les fichiers y sont pris en compte au prochain lancement.
+
+Idée : enregistrez la voix de papa ou maman — c'est elle que l'enfant
+entendra compter les ballons et dire les lettres. 🐞
+
+Traduire l'application = dupliquer le dossier lang/fr/ (textes.xml + voix/)
+en lang/<code>/ et traduire. Voir DOCS/specs/spec-lang.md du projet.

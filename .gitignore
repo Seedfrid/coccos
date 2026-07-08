@@ -1,0 +1,4 @@
+# Cache et fichiers propres à la machine (jamais dans le dépôt)
+.godot/
+export_presets.cfg
+*.tmp
