@@ -49,7 +49,7 @@
 	<texte cle="reglages_souris">Réglages de la souris</texte>
 	<texte cle="reglages_clavier">Réglages du clavier</texte>
 	<texte cle="reglages_interface">Réglages de l'interface</texte>
-	<texte cle="reglages_applis">Applications externes</texte>
+	<texte cle="reglages_applis">Logithèque (jeux et applications)</texte>
 	<texte cle="reglages_classeur">Classeur de communication</texte>
 	<texte cle="reglages_tele">Télé de l'enfant</texte>
 	<texte cle="reglages_espace">Espace famille</texte>
@@ -105,8 +105,17 @@
 	<texte cle="interface_msg_importe">Fond d'écran importé :</texte>
 
 	<!-- ═══ Réglages — Applications externes ═══ -->
-	<texte cle="applis_titre">Réglages — Applications externes</texte>
-	<texte cle="applis_info">Les applications cochées apparaissent sur le bureau de l'enfant.</texte>
+	<texte cle="applis_titre">Réglages — Logithèque</texte>
+	<texte cle="logitheque_titre_coccos">Applications CoccOs (cochée = sur le bureau)</texte>
+	<texte cle="logitheque_titre_externes">Applications externes</texte>
+	<texte cle="logitheque_desc_pointeur">Découverte — explorer la souris librement</texte>
+	<texte cle="logitheque_desc_ballons">Les ballons — viser, cliquer, compter</texte>
+	<texte cle="logitheque_desc_lettres">Les lettres — taper, voir et entendre les lettres</texte>
+	<texte cle="logitheque_desc_mots">Les mots — recopier les mots du classeur et de la famille</texte>
+	<texte cle="logitheque_desc_chasse">La chasse — attraper les lettres au clavier ou à la souris</texte>
+	<texte cle="logitheque_desc_classeur">Mon classeur — les vignettes qui parlent (communication)</texte>
+	<texte cle="logitheque_desc_tele">Ma télé — les vidéos choisies par les parents</texte>
+	<texte cle="applis_info">Tout ce qui est coché apparaît sur le bureau de l'enfant — rien d'autre.</texte>
 	<texte cle="applis_desc_tuxpaint">TuxPaint — dessin pour enfants</texte>
 	<texte cle="applis_desc_gcompris">GCompris — activités éducatives</texte>
 	<texte cle="applis_desc_tuxmath">TuxMath — calcul mental</texte>

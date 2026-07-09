@@ -17,6 +17,7 @@ var est_dossier := false  # true = catégorie : dessinée comme un dossier à on
 var picto := ""  # pictogramme à dessiner si différent de l'id (applis externes)
 
 var _btn: Button
+var return_apres_image := false  # une icône-image remplace le pictogramme
 
 
 func _ready() -> void:
@@ -62,13 +63,33 @@ func _ready() -> void:
 		picto_ctrl.offset_top = 38
 		picto_ctrl.offset_right = -26
 		picto_ctrl.offset_bottom = -12
+	elif ResourceLoader.exists("res://assets/icones/%s.png" % (picto if picto != "" else id)):
+		# Icône-image (plaque « livrée coccinelle » de Freddy) : elle EST le
+		# bouton — fond transparent, l'image plein cadre, survol par éclat
+		var vide := StyleBoxEmpty.new()
+		for etat in ["normal", "hover", "pressed"]:
+			_btn.add_theme_stylebox_override(etat, vide)
+		var focus := UIStyle.creer_style(Color(0, 0, 0, 0), 24, true)
+		focus.draw_center = false
+		_btn.add_theme_stylebox_override("focus", focus)
+		var image := TextureRect.new()
+		image.texture = load("res://assets/icones/%s.png" % (picto if picto != "" else id))
+		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		image.set_anchors_preset(Control.PRESET_FULL_RECT)
+		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_btn.add_child(image)
+		_btn.mouse_entered.connect(func() -> void: image.modulate = Color(1.12, 1.12, 1.12))
+		_btn.mouse_exited.connect(func() -> void: image.modulate = Color.WHITE)
+		return_apres_image = true
 	else:
 		UIStyle.styliser(_btn, couleur, 24)
 		picto_ctrl.offset_left = 16
 		picto_ctrl.offset_top = 16
 		picto_ctrl.offset_right = -16
 		picto_ctrl.offset_bottom = -16
-	_btn.add_child(picto_ctrl)
+	if not return_apres_image:
+		_btn.add_child(picto_ctrl)
 
 	# Libellé sous l'icône, blanc à contour sombre (lisible sur la prairie)
 	var libelle := Label.new()

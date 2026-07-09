@@ -29,25 +29,10 @@ const Migration := preload("res://scripts/migration.gd")
 ## id ; "externe" = lance un programme installé (ajouté par _applis_bureau()).
 ## Règle : AUCUNE icône fantôme — pas de stimuli inutiles. Les activités à
 ## venir vivent dans la ROADMAP, pas sur le bureau de l'enfant.
-const APPLIS := [
-	{"id": "souris", "nom_cle": "bureau_categorie_souris", "couleur": Color(0.20, 0.60, 0.90), "fenetre": true},
-	{"id": "clavier", "nom_cle": "bureau_categorie_clavier", "couleur": Color(0.25, 0.75, 0.50), "fenetre": true},
-	{"id": "classeur", "nom_cle": "bureau_app_classeur", "couleur": Color(0.90, 0.40, 0.45), "scene": "res://scenes/classeur.tscn"},
-	{"id": "tele", "nom_cle": "bureau_app_tele", "couleur": Color(0.45, 0.40, 0.85), "scene": "res://scenes/tele.tscn"},
-]
-
-## Contenu des fenêtres-catégories : les jeux de la souris.
-const FENETRES := {
-	"souris": [
-		{"id": "pointeur", "nom_cle": "bureau_jeu_decouverte", "couleur": Color(0.20, 0.60, 0.90), "scene": "res://scenes/souris.tscn"},
-		{"id": "ballons", "nom_cle": "bureau_jeu_ballons", "couleur": Color(0.90, 0.30, 0.40), "scene": "res://scenes/ballons.tscn"},
-	],
-	"clavier": [
-		{"id": "lettres", "nom_cle": "bureau_jeu_lettres", "couleur": Color(0.25, 0.75, 0.50), "scene": "res://scenes/lettres.tscn"},
-		{"id": "mots", "nom_cle": "bureau_jeu_mots", "couleur": Color(0.95, 0.55, 0.15), "scene": "res://scenes/mots.tscn"},
-		{"id": "chasse", "nom_cle": "bureau_jeu_chasse", "couleur": Color(0.75, 0.35, 0.75), "scene": "res://scenes/chasse.tscn"},
-	],
-}
+## Le bureau se construit depuis le REGISTRE (scripts/registre_jeux.gd, spec
+## logithèque) : catégories nées des jeux actifs, applications activables par
+## l'adulte dans la logithèque — plus de liste en dur ici.
+const Registre := preload("res://scripts/registre_jeux.gd")
 
 const HAUTEUR_BARRE := 76
 const COULEUR_BARRE := Color(0.13, 0.17, 0.28, 0.92)
@@ -253,12 +238,15 @@ func _poser_etoile(ou: Vector2, couleur: Color, rayon: float,
 
 # --- Icônes du bureau -------------------------------------------------------
 
-## Liste réelle du bureau : catégories + applications externes cochées/installées.
-## La télé n'existe pas sur le web (pas de fichiers) — aucune icône fantôme.
+## Liste réelle du bureau : catégories ayant des jeux actifs + applications
+## directes actives + applications externes cochées/installées — tout vient
+## du registre et des choix de l'adulte (aucune icône fantôme).
 func _applis_bureau() -> Array:
-	var liste := APPLIS.duplicate()
-	if OS.has_feature("web"):
-		liste = liste.filter(func(appli: Dictionary) -> bool: return appli["id"] != "tele")
+	var liste := []
+	for categorie in Registre.categories_visibles():
+		liste.append({"id": categorie["id"], "nom_cle": categorie["nom_cle"],
+			"couleur": categorie["couleur"], "fenetre": true})
+	liste.append_array(Registre.actives_directes())
 	liste.append_array(AppliExternes.applis_actives())
 	return liste
 
@@ -316,12 +304,10 @@ func _lancer_externe(appli: Dictionary) -> void:
 
 ## Lance un jeu depuis une fenêtre-catégorie.
 func _lancer_jeu(id: String) -> void:
-	for categorie in FENETRES:
-		for jeu in FENETRES[categorie]:
-			if jeu["id"] == id:
-				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-				get_tree().change_scene_to_file(jeu["scene"])
-				return
+	var jeu: Dictionary = Registre.appli(id)
+	if not jeu.is_empty():
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_tree().change_scene_to_file(jeu["scene"])
 
 
 # --- Fenêtres-catégories ------------------------------------------------------
@@ -342,7 +328,7 @@ func _ouvrir_fenetre(id: String, titre: String, couleur: Color) -> void:
 	add_child(fenetre)  # dernier enfant = dessiné au-dessus du reste
 	_fenetres_ouvertes[id] = fenetre
 
-	for jeu in FENETRES[id]:
+	for jeu in Registre.jeux_de(id):
 		var icone: Control = IconeBureau.new()
 		icone.id = jeu["id"]
 		icone.nom = Lang.t(jeu["nom_cle"])

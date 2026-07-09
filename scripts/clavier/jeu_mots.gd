@@ -46,6 +46,8 @@ var _mots := []
 var _mot_cible := ""
 var _position := 0
 var _en_transition := false
+var _banque: RefCounted = null   # la banque du classeur (mots + pictos)
+var _picto_mot: Control = null   # le pictogramme montré à la complétion
 
 var _ligne_tuiles: HBoxContainer
 var _tuiles := []  # [PanelContainer, StyleBoxFlat, Label] par lettre
@@ -113,26 +115,51 @@ func _creer_lecteurs() -> void:
 		_lecteurs[nom] = lecteur
 
 
-## Voix française du système, résolue PARESSEUSEMENT et mise en cache (les voix
-## du navigateur se chargent en asynchrone : liste vide au démarrage sur le web).
-## Repli : n'importe quelle voix disponible. "" si le système n'a aucune voix.
-## Liste des mots à apprendre depuis les réglages adulte ([clavier] mots).
+## Les mots du jeu = liste manuelle (réglages adulte, [clavier] mots)
+## + LES MOTS DU CLASSEUR (idée Freddy 2026-07-08 : le classeur est LA banque
+## de vocabulaire de la plateforme — catégories Personnes avec photos, animaux,
+## aliments… taper le mot qu'on sait « dire » en vignette = le pont
+## communication → écriture). Filtre des mots tapables : un seul mot, lettres
+## uniquement, ≤ 12 caractères ; en mode tactile, les accentués sortent aussi
+## (le clavier dessiné n'a pas d'accents).
 func _charger_mots() -> void:
 	var cfg := ConfigFile.new()
 	_mots = []
 	if cfg.load(CHEMIN_CONFIG) == OK:
 		for mot in cfg.get_value("clavier", "mots", PackedStringArray()):
 			var propre: String = String(mot).strip_edges().to_upper()
-			if propre != "":
+			if propre != "" and not propre in _mots:
 				_mots.append(propre)
+	_banque = (load("res://scripts/classeur/banque.gd") as GDScript).charger()
+	for id in _banque.ids_vignettes():
+		var mot: String = String(_banque.mot(id)).strip_edges().to_upper()
+		if _mot_tapable(mot) and not mot in _mots:
+			_mots.append(mot)
 	if _mots.is_empty():
 		_mots = MOTS_DEFAUT.duplicate()
+
+
+## Un mot du classeur entre dans le jeu s'il se TAPE bien : un seul mot,
+## lettres uniquement, pas trop long — et sans accents en mode tactile.
+func _mot_tapable(mot: String) -> bool:
+	if mot.length() < 2 or mot.length() > 12:
+		return false
+	var sans_accents := Tactile.actif()
+	for i in mot.length():
+		var caractere := mot[i]
+		if not "ABCDEFGHIJKLMNOPQRSTUVWXYZ".contains(caractere):
+			if sans_accents or not "ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ".contains(caractere):
+				return false
+	return true
 
 
 # --- Déroulé du jeu -----------------------------------------------------------
 
 ## Nouveau mot au hasard (différent du courant si possible), tuiles reconstruites.
 func _nouveau_mot() -> void:
+	if _picto_mot != null:
+		_picto_mot.queue_free()  # l'image du mot précédent s'efface
+		_picto_mot = null
 	var candidat: String = _mots.pick_random()
 	if _mots.size() > 1:
 		while candidat == _mot_cible:
@@ -232,10 +259,13 @@ func _lettre_juste() -> void:
 		_mot_complete()
 
 
-## Mot complété : explosion de fleurs + pop joyeux + la voix dit le mot, puis suivant.
+## Mot complété : explosion de fleurs + pop joyeux + la voix dit le mot —
+## et si le mot a une vignette au classeur, SON IMAGE apparaît (taper « MAMAN »
+## fait apparaître la photo de maman : le mot écrit devient la chose).
 func _mot_complete() -> void:
 	_en_transition = true
 	_lecteurs["pop"].play()
+	_montrer_picto_du_mot()
 	for tuile_infos in _tuiles:
 		var tuile: PanelContainer = tuile_infos[0]
 		var ou: Vector2 = tuile.global_position + tuile.size / 2.0
@@ -253,6 +283,33 @@ func _mot_complete() -> void:
 		return
 	_nouveau_mot()
 	_en_transition = false
+
+
+## L'image de la vignette du classeur portant ce mot, en douceur au-dessus des
+## tuiles (rien si le mot n'a pas de vignette — la fête aux fleurs suffit).
+func _montrer_picto_du_mot() -> void:
+	if _banque == null:
+		return
+	for id in _banque.ids_vignettes():
+		if String(_banque.mot(id)).strip_edges().to_upper() != _mot_cible:
+			continue
+		var texture: ImageTexture = _banque.texture(id)
+		if texture == null:
+			return
+		_picto_mot = TextureRect.new()
+		_picto_mot.texture = texture
+		_picto_mot.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_picto_mot.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_picto_mot.size = Vector2(220, 220)
+		_picto_mot.position = get_viewport_rect().size / 2.0 - Vector2(110, 340)
+		_picto_mot.pivot_offset = Vector2(110, 110)
+		_picto_mot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_picto_mot)
+		_picto_mot.scale = Vector2.ZERO
+		var animation := create_tween()
+		animation.tween_property(_picto_mot, "scale", Vector2.ONE, 0.4) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		return
 
 
 ## Enregistrement (lang/<code>/voix/) s'il existe, synthèse vocale sinon.

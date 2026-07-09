@@ -343,8 +343,15 @@ func _quitter() -> void:
 		get_tree().quit()
 
 
-## Bulle-lettre flottante : disque blanc cerclé de couleur, lettre colorée.
+## Bulle-lettre flottante : corps de bulle de savon (image de Freddy,
+## assets/chasse/bulle.png — reflets faits main dans GIMP) cerclé de couleur,
+## lettre colorée. Repli : disque blanc dessiné si l'image manque.
 class _BulleLettre extends Node2D:
+	const CHEMIN_BULLE := "res://assets/chasse/bulle.png"
+	# Godot met les ressources chargées en cache : load() par bulle est gratuit
+	# (une statique retiendrait la texture à la fermeture → fuite signalée)
+	var texture_bulle: Texture2D = null
+
 	var lettre := "A"
 	var couleur := Color(0.3, 0.6, 0.9)
 	var rayon := 46.0
@@ -374,8 +381,19 @@ class _BulleLettre extends Node2D:
 		return point.distance_to(position) <= rayon * 1.25  # marge petites mains
 
 	func _draw() -> void:
-		draw_circle(Vector2.ZERO, rayon + 5.0, Color(couleur.darkened(0.15), 0.95))
-		draw_circle(Vector2.ZERO, rayon, Color(0.99, 0.98, 0.94, 0.96))
+		if texture_bulle == null and ResourceLoader.exists(CHEMIN_BULLE):
+			texture_bulle = load(CHEMIN_BULLE)
+		if texture_bulle != null:
+			# Corps de bulle de savon (image) + anneau de couleur par-dessus
+			var cote := (rayon + 5.0) * 2.0
+			draw_texture_rect(texture_bulle, Rect2(Vector2(-cote / 2.0, -cote / 2.0),
+				Vector2(cote, cote)), false)
+			draw_arc(Vector2.ZERO, rayon + 2.0, 0.0, TAU, 48,
+				Color(couleur.darkened(0.15), 0.9), 5.0, true)
+		else:
+			# Repli : le dessin d'origine (disque blanc cerclé)
+			draw_circle(Vector2.ZERO, rayon + 5.0, Color(couleur.darkened(0.15), 0.95))
+			draw_circle(Vector2.ZERO, rayon, Color(0.99, 0.98, 0.94, 0.96))
 		var police := ThemeDB.fallback_font
 		var taille := int(rayon * 1.15)
 		var hauteur := police.get_ascent(taille) - police.get_descent(taille)
