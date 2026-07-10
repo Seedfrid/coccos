@@ -11,6 +11,7 @@ extends Control
 const PinConfig = preload("res://scripts/pin_config.gd")
 const UIStyle = preload("res://scripts/ui_style.gd")
 const Lang = preload("res://scripts/lang.gd")
+const Android = preload("res://scripts/android.gd")
 const Tactile = preload("res://scripts/tactile.gd")
 
 const COULEUR_BARRE_DEFAUT := Color(0.25, 0.45, 0.75)   # affichage pastille (auto = couleur du jeu)
@@ -112,6 +113,18 @@ func _ready() -> void:
 	case_volume.toggled.connect(func(actif: bool) -> void:
 		PinConfig.ecrire_option("interface", "bouton_volume", actif))
 	vbox.add_child(case_volume)
+
+	# --- Mode bureau du téléphone (Android) : ouvre le réglage système où l'on
+	#     choisit CoccOs (entrée) ou le lanceur d'origine (sortie) ---
+	if Android.disponible():
+		var btn_bureau_tel := Button.new()
+		btn_bureau_tel.text = Lang.t("interface_bureau_telephone")
+		btn_bureau_tel.custom_minimum_size = Vector2(460, 64)
+		btn_bureau_tel.add_theme_font_size_override("font_size", 24)
+		UIStyle.styliser(btn_bureau_tel, Color(0.30, 0.45, 0.60), 14)
+		btn_bureau_tel.pressed.connect(func() -> void:
+			Android.ouvrir_reglage_bureau())
+		vbox.add_child(btn_bureau_tel)
 
 	# --- Couleur des fenêtres ---
 	vbox.add_child(_creer_sous_titre(Lang.t("interface_couleur_fenetres")))

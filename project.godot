@@ -8,10 +8,15 @@
 
 config_version=5
 
+[autoload]
+
+VeilleurIntent="*res://scripts/veilleur_intent.gd"
+
 [application]
 
 config/name="CoccOs"
-config/version="0.1.28.36"
+config/version="0.1.28.37"
+config/quit_on_go_back=false
 run/main_scene="res://scenes/bureau.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 

@@ -2,3 +2,22 @@
 .godot/
 export_presets.cfg
 *.tmp
+
+# Gabarit de build Android (gradle) : seuls NOS fichiers modifiés sont
+# versionnés — le reste se réinstalle via l'éditeur Godot (« Install Android
+# Build Template »), puis git restaure le manifeste et l'activité.
+android/*
+!android/.build_version
+!android/build
+android/build/*
+!android/build/src
+android/build/src/*
+!android/build/src/main
+android/build/src/main/*
+!android/build/src/main/AndroidManifest.xml
+!android/build/src/main/java
+android/build/src/main/java/**
+!android/build/src/main/java/com/
+!android/build/src/main/java/com/godot/
+!android/build/src/main/java/com/godot/game/
+!android/build/src/main/java/com/godot/game/GodotApp.java

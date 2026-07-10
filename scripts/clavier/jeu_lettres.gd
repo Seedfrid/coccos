@@ -481,3 +481,9 @@ class _IconeRetourArriere extends Control:
 			centre + Vector2(-u * 0.15, -u * 0.38),
 			centre + Vector2(-u * 0.15, u * 0.38),
 		]), Color.WHITE)
+
+
+## Bouton Retour d'Android (mode bureau/launcher) : même geste que la croix.
+func _notification(quoi: int) -> void:
+	if quoi == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_quitter()

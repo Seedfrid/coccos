@@ -166,3 +166,22 @@ static func choisir(paquet: String, nom: String, actif: bool) -> void:
 
 static func chemin_icone(paquet: String) -> String:
 	return "%s/%s.png" % [DOSSIER_ICONES, paquet]
+
+
+# --- Mode bureau (launcher) ---------------------------------------------------------
+
+## Ouvre le réglage Android « Écran d'accueil » — la sortie du mode bureau :
+## le parent y rebascule sur le lanceur d'origine (et pourra remettre CoccOs
+## par le même chemin). Lancer directement l'autre lanceur ne marche pas
+## partout : sur MIUI, le lanceur Xiaomi non-défaut ne sait afficher que
+## l'écran des applis récentes (constaté le 2026-07-10).
+static func ouvrir_reglage_bureau() -> bool:
+	var activite := _activite()
+	if activite == null:
+		return false
+	var ClasseIntent = JavaClassWrapper.wrap("android.content.Intent")
+	var intention = ClasseIntent.Intent()
+	intention.setAction("android.settings.HOME_SETTINGS")
+	intention.addFlags(268435456)  # FLAG_ACTIVITY_NEW_TASK
+	activite.startActivity(intention)
+	return true

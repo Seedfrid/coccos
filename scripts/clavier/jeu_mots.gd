@@ -392,3 +392,9 @@ class _IconeCroixFermer extends Control:
 		draw_line(centre + Vector2(-bras, bras), centre + Vector2(bras, -bras), Color.WHITE, epaisseur)
 		for coin: Vector2 in [Vector2(-bras, -bras), Vector2(bras, -bras), Vector2(-bras, bras), Vector2(bras, bras)]:
 			draw_circle(centre + coin, epaisseur / 2.0, Color.WHITE)
+
+
+## Bouton Retour d'Android (mode bureau/launcher) : même geste que la croix.
+func _notification(quoi: int) -> void:
+	if quoi == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_quitter()

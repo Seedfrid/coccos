@@ -7,6 +7,8 @@
 ## numérique), retour arrière = effacer, Entrée = valider.
 extends Control
 
+const Android := preload("res://scripts/android.gd")
+
 # Helper centralisé pour la gestion du PIN
 const PinConfig = preload("res://scripts/pin_config.gd")
 const Lang = preload("res://scripts/lang.gd")
@@ -262,6 +264,11 @@ func _valider() -> void:
 func _eteindre() -> void:
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.location.href = '../';")
+	elif Android.ouvrir_reglage_bureau():
+		# Sortie du mode bureau : le réglage « Écran d'accueil » s'ouvre, le
+		# parent y rebascule sur le lanceur d'origine. CoccOs se replace sur
+		# son bureau, prêt pour la prochaine fois.
+		get_tree().change_scene_to_file("res://scenes/bureau.tscn")
 	else:
 		get_tree().quit()
 
