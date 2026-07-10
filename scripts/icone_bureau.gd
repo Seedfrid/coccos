@@ -15,6 +15,7 @@ var nom := ""
 var couleur := Color(0.3, 0.5, 0.8)
 var est_dossier := false  # true = catégorie : dessinée comme un dossier à onglet
 var picto := ""  # pictogramme à dessiner si différent de l'id (applis externes)
+var chemin_image := ""  # PNG hors ressources (user:// — icônes du téléphone)
 
 var _btn: Button
 var return_apres_image := false  # une icône-image remplace le pictogramme
@@ -63,6 +64,29 @@ func _ready() -> void:
 		picto_ctrl.offset_top = 38
 		picto_ctrl.offset_right = -26
 		picto_ctrl.offset_bottom = -12
+	elif chemin_image != "" and FileAccess.file_exists(chemin_image):
+		# Icône du téléphone (PNG déposé par la logithèque Android) : l'icône
+		# système posée sur la plaque colorée, comme les autres icônes
+		UIStyle.styliser(_btn, couleur, 24)
+		var image_tel := Image.load_from_file(chemin_image)
+		if image_tel != null and not image_tel.is_empty():
+			var affichage := TextureRect.new()
+			affichage.texture = ImageTexture.create_from_image(image_tel)
+			affichage.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			affichage.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			affichage.set_anchors_preset(Control.PRESET_FULL_RECT)
+			affichage.offset_left = 14
+			affichage.offset_top = 14
+			affichage.offset_right = -14
+			affichage.offset_bottom = -14
+			affichage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_btn.add_child(affichage)
+			return_apres_image = true
+		else:
+			picto_ctrl.offset_left = 16
+			picto_ctrl.offset_top = 16
+			picto_ctrl.offset_right = -16
+			picto_ctrl.offset_bottom = -16
 	elif ResourceLoader.exists("res://assets/icones/%s.png" % (picto if picto != "" else id)):
 		# Icône-image (plaque « livrée coccinelle » de Freddy) : elle EST le
 		# bouton — fond transparent, l'image plein cadre, survol par éclat

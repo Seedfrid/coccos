@@ -89,6 +89,9 @@
 	<texte cle="logitheque_raccourci_cree">✔ Icône créée — menu des applications</texte>
 	<texte cle="logitheque_raccourci_echec">✖ Impossible de créer l'icône</texte>
 	<texte cle="logitheque_raccourci_impossible">indisponible sur cet appareil</texte>
+	<texte cle="logitheque_raccourci_android">✔ Confirmer l'ajout sur l'écran du téléphone</texte>
+	<texte cle="logitheque_titre_telephone">Les applications du téléphone (cochée = sur le bureau)</texte>
+	<texte cle="logitheque_tel_info">Toute application du téléphone peut rejoindre le bureau de l'enfant, avec sa vraie icône — à choisir avec soin : le bureau reste son espace protégé.</texte>
 
 	<!-- ═══ Réglages — Langue (sélecteur + éditeur de traduction) ═══ -->
 	<texte cle="reglages_langue">Langue de CoccOs</texte>

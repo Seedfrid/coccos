@@ -25,6 +25,7 @@ const Tactile := preload("res://scripts/tactile.gd")
 const Migration := preload("res://scripts/migration.gd")
 const Voix := preload("res://scripts/voix.gd")
 const Lancement := preload("res://scripts/lancement.gd")
+const Android := preload("res://scripts/android.gd")
 
 ## Registre des applications du bureau (id = pictogramme, sauf "picto" fourni).
 ## "scene" = lancée directement ; "fenetre" = ouvre la fenêtre-catégorie du même
@@ -262,6 +263,14 @@ func _applis_bureau() -> Array:
 			"couleur": categorie["couleur"], "fenetre": true})
 	liste.append_array(Registre.actives_directes())
 	liste.append_array(AppliExternes.applis_actives())
+	# Les applis du téléphone choisies dans la logithèque (Android, phase B) —
+	# leur icône système est affichée telle quelle (nom_cle = nom réel : le
+	# repli de Lang.t rend la clé, donc le nom, sans traduction à fournir)
+	var telephone: Dictionary = Android.choisies()
+	for paquet in telephone:
+		liste.append({"id": "tel:" + paquet, "nom_cle": telephone[paquet],
+			"couleur": Color(0.35, 0.45, 0.60), "telephone": paquet,
+			"image": Android.chemin_icone(paquet)})
 	return liste
 
 
@@ -276,6 +285,7 @@ func _creer_icones() -> void:
 		icone.nom = Lang.t(appli["nom_cle"])
 		icone.couleur = appli["couleur"]
 		icone.picto = appli.get("picto", "")
+		icone.chemin_image = appli.get("image", "")
 		icone.est_dossier = appli.has("fenetre")  # catégorie = icône dossier
 		@warning_ignore("integer_division")
 		icone.position = Vector2(30 + (i / par_colonne) * 180, 26 + (i % par_colonne) * 178)
@@ -293,7 +303,12 @@ func _lancer_appli(id: String) -> void:
 		_menu.visible = false
 	for appli in _applis_bureau():
 		if appli["id"] == id:
-			if appli.has("externe"):
+			if appli.has("telephone"):
+				# Appli du téléphone : elle s'ouvre par-dessus, retour = bureau intact
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				Android.lancer_paquet(appli["telephone"])
+				Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+			elif appli.has("externe"):
 				_lancer_externe(appli)
 			elif appli.has("scene"):
 				# Curseur système rendu visible (les jeux le remasquent eux-mêmes)

@@ -1,7 +1,11 @@
-## Lancement direct d'une application — « coccos --app classeur » (spec logithèque,
-## chantier icônes directes 2026-07-10). L'argument arrive dans les user args
-## (après « -- » : le lanceur .deb et les raccourcis Windows l'y placent) ; repli
-## sur la ligne de commande brute pour les lancements à la main.
+## Lancement direct d'une application (spec logithèque, chantier icônes directes).
+## Deux canaux, selon la plateforme :
+##   - desktop : « coccos --app classeur » — l'argument arrive dans les user args
+##     (après « -- » : lanceur .deb et raccourcis Windows l'y placent), repli sur
+##     la ligne de commande brute pour les lancements à la main ;
+##   - Android : le raccourci épinglé porte un extra « coccos_app » dans son
+##     intent — le gabarit Godot n'expose PAS les extras en ligne de commande
+##     (vérifié sur appareil 2026-07-10), on lit l'intent par le pont Java.
 ## En mode direct, la croix des applis QUITTE CoccOs au lieu de revenir au bureau.
 extends Object
 
@@ -20,5 +24,14 @@ static func app_directe() -> String:
 	for i in args.size():
 		if args[i] == "--app" and i + 1 < args.size():
 			_cache = args[i + 1].strip_edges()
-			break
+			return _cache
+	# Android : l'extra « coccos_app » de l'intent (raccourci épinglé)
+	if OS.has_feature("android") and Engine.has_singleton("AndroidRuntime"):
+		var activite = Engine.get_singleton("AndroidRuntime").getActivity()
+		if activite != null:
+			var intention = activite.getIntent()
+			if intention != null:
+				var extra = intention.getStringExtra("coccos_app")
+				if extra != null:
+					_cache = str(extra).strip_edges()
 	return _cache

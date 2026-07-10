@@ -15,6 +15,7 @@ const AppliExternes = preload("res://scripts/applis_externes.gd")
 const Registre = preload("res://scripts/registre_jeux.gd")
 const Lang = preload("res://scripts/lang.gd")
 const Raccourcis = preload("res://scripts/raccourcis.gd")
+const Android = preload("res://scripts/android.gd")
 
 
 func _ready() -> void:
@@ -76,6 +77,27 @@ func _ready() -> void:
 	for appli in AppliExternes.catalogue_plateforme():
 		vbox.add_child(_creer_ligne(appli))
 
+	# --- 3. Les applications du téléphone (Android, logithèque phase B) ---
+	# Toute appli installée peut rejoindre le bureau de l'enfant, avec son
+	# icône système — à choisir avec soin (la règle « rien d'autre » demeure).
+	if Android.disponible():
+		var titre_tel := Label.new()
+		titre_tel.text = Lang.t("logitheque_titre_telephone")
+		titre_tel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		titre_tel.add_theme_font_size_override("font_size", 30)
+		titre_tel.add_theme_color_override("font_color", Color.WHITE)
+		vbox.add_child(titre_tel)
+		var info_tel := Label.new()
+		info_tel.text = Lang.t("logitheque_tel_info")
+		info_tel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info_tel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		info_tel.add_theme_font_size_override("font_size", 20)
+		info_tel.add_theme_color_override("font_color", Color(0.85, 0.92, 0.88))
+		vbox.add_child(info_tel)
+		var choisies: Dictionary = Android.choisies()
+		for entree in Android.applis_lancables():
+			vbox.add_child(_creer_ligne_telephone(entree, choisies))
+
 	# --- Bouton retour vers les réglages ---
 	var btn_retour := Button.new()
 	btn_retour.text = Lang.t("reglages_retour")
@@ -125,7 +147,7 @@ func _creer_ligne_coccos(appli: Dictionary) -> Control:
 	ligne.add_child(case_appli)
 
 	# ➕ Icône directe sur l'appareil (lancement sans passer par le bureau) —
-	# quand la plateforme sait le faire (Linux ; Windows : posée par l'installeur)
+	# quand la plateforme sait le faire (Linux, Android ; Windows : installeur)
 	if Raccourcis.possible():
 		var btn_icone := Button.new()
 		btn_icone.text = Lang.t("logitheque_btn_raccourci")
@@ -135,6 +157,25 @@ func _creer_ligne_coccos(appli: Dictionary) -> Control:
 		btn_icone.pressed.connect(func() -> void:
 			btn_icone.text = Lang.t(Raccourcis.creer(id, nom_appli)))
 		ligne.add_child(btn_icone)
+	return ligne
+
+
+## Ligne d'une application du téléphone : cochée = sur le bureau de l'enfant,
+## avec son icône système (déposée dans user:// au moment du choix).
+func _creer_ligne_telephone(entree: Dictionary, choisies: Dictionary) -> Control:
+	var ligne := HBoxContainer.new()
+	ligne.alignment = BoxContainer.ALIGNMENT_CENTER
+	var case_tel := CheckBox.new()
+	case_tel.text = " " + entree["nom"]
+	case_tel.add_theme_font_size_override("font_size", 24)
+	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		case_tel.add_theme_color_override(etat, Color.WHITE)
+	case_tel.button_pressed = choisies.has(entree["paquet"])
+	var paquet: String = entree["paquet"]
+	var nom: String = entree["nom"]
+	case_tel.toggled.connect(func(actif: bool) -> void:
+		Android.choisir(paquet, nom, actif))
+	ligne.add_child(case_tel)
 	return ligne
 
 
