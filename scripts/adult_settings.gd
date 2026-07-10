@@ -16,6 +16,7 @@ const SECTIONS := [
 	["reglages_classeur", Color(0.75, 0.35, 0.40), "_aller_reglages_classeur"],
 	["reglages_tele", Color(0.45, 0.40, 0.85), "_aller_reglages_tele"],
 	["reglages_espace", Color(0.60, 0.45, 0.20), "_aller_reglages_espace"],
+	["reglages_langue", Color(0.35, 0.55, 0.30), "_aller_reglages_langue"],
 	["reglages_changer_pin", Color(0.55, 0.35, 0.10), "_changer_pin"],
 ]
 
@@ -110,6 +111,11 @@ func _aller_reglages_tele() -> void:
 ## Navigue vers le sous-écran de l'espace famille.
 func _aller_reglages_espace() -> void:
 	get_tree().change_scene_to_file("res://scenes/reglages_espace.tscn")
+
+
+## Navigue vers le sous-écran de langue (sélecteur + éditeur de traduction).
+func _aller_reglages_langue() -> void:
+	get_tree().change_scene_to_file("res://scenes/reglages_langue.tscn")
 
 
 ## Navigue vers le sous-écran des réglages souris.

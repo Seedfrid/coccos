@@ -82,6 +82,27 @@
 	<texte cle="interface_plein_ecran">Plein écran au lancement</texte>
 	<texte cle="interface_pin_eteindre">Protéger le bouton éteindre par le code PIN</texte>
 	<texte cle="interface_mode_tactile">Mode écran tactile (appui long = clic droit, clavier virtuel)</texte>
+	<texte cle="interface_bouton_volume">Bouton de volume pour l'enfant (barre des tâches)</texte>
+
+	<!-- ═══ Icônes directes (logithèque) ═══ -->
+	<texte cle="logitheque_btn_raccourci">➕ Icône sur l'appareil</texte>
+	<texte cle="logitheque_raccourci_cree">✔ Icône créée — menu des applications</texte>
+	<texte cle="logitheque_raccourci_echec">✖ Impossible de créer l'icône</texte>
+	<texte cle="logitheque_raccourci_impossible">indisponible sur cet appareil</texte>
+
+	<!-- ═══ Réglages — Langue (sélecteur + éditeur de traduction) ═══ -->
+	<texte cle="reglages_langue">Langue de CoccOs</texte>
+	<texte cle="langue_titre">Réglages — Langue</texte>
+	<texte cle="langue_info">CoccOs parle la langue choisie ici — et une langue peut se créer directement dans l'application, texte par texte, sans toucher un fichier. Les voix enregistrées suivent la même langue.</texte>
+	<texte cle="langue_active">Langue de l'interface :</texte>
+	<texte cle="langue_note_relance">La nouvelle langue s'applique au prochain lancement de CoccOs.</texte>
+	<texte cle="langue_code_placeholder">code de la langue (ex : en)…</texte>
+	<texte cle="langue_btn_editer">Créer / modifier</texte>
+	<texte cle="langue_editeur_info">Traduire chaque texte ci-dessous — un champ laissé vide garde le français. Enregistrer en bas de page.</texte>
+	<texte cle="langue_btn_enregistrer">Enregistrer la langue</texte>
+	<texte cle="langue_msg_enregistree">Langue enregistrée (%d textes traduits) — sélectionnez-la ci-dessus.</texte>
+	<texte cle="langue_msg_echec">Impossible d'enregistrer la langue.</texte>
+	<texte cle="langue_msg_code_invalide">Code invalide : 2 à 5 lettres minuscules (ex : en, es, de).</texte>
 	<texte cle="interface_couleur_fenetres">Couleur des fenêtres</texte>
 	<texte cle="interface_barre">Barre :</texte>
 	<texte cle="interface_fond">Fond :</texte>

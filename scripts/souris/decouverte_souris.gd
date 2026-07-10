@@ -26,6 +26,7 @@ extends Control
 const Fond := preload("res://scripts/fond.gd")
 const Tactile := preload("res://scripts/tactile.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 
 const PAS_TRAINEE := 26.0  # distance (px) entre deux étoiles de la traînée
 
@@ -179,7 +180,8 @@ func _creer_bouton_quitter() -> void:
 ## Retour au bureau enfant si le jeu est intégré, sinon fermeture (jeu autonome).
 func _quitter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()

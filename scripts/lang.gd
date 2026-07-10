@@ -33,10 +33,22 @@ static func _charger() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(CHEMIN_CONFIG) == OK:
 		_code = str(cfg.get_value("langue", "code", "fr"))
-	var chemin := "res://lang/%s/textes.xml" % _code
+	# Base = français (repli clé par clé : une traduction PARTIELLE reste utilisable),
+	# puis la langue choisie par-dessus — embarquée (res://) ou créée dans
+	# l'éditeur de langue (user://lang/<code>/textes.xml, prioritaire).
+	_lire_fichier("res://lang/fr/textes.xml")
+	if _code == "fr":
+		return
+	var chemin := "user://lang/%s/textes.xml" % _code
+	if not FileAccess.file_exists(chemin):
+		chemin = "res://lang/%s/textes.xml" % _code
 	if not FileAccess.file_exists(chemin):
 		_code = "fr"
-		chemin = "res://lang/fr/textes.xml"
+		return
+	_lire_fichier(chemin)
+
+
+static func _lire_fichier(chemin: String) -> void:
 	var xml := XMLParser.new()
 	if xml.open(chemin) != OK:
 		push_warning("Lang : impossible d'ouvrir " + chemin)
@@ -49,6 +61,8 @@ static func _charger() -> void:
 						if xml.get_node_name() == "texte" else ""
 			XMLParser.NODE_TEXT:
 				if cle_courante != "":
-					_textes[cle_courante] = xml.get_node_data().strip_edges()
+					var valeur := xml.get_node_data().strip_edges()
+					if valeur != "":
+						_textes[cle_courante] = valeur
 			_:
 				cle_courante = ""

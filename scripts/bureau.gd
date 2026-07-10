@@ -23,6 +23,8 @@ const Sons := preload("res://scripts/effets/sons.gd")
 const Lang := preload("res://scripts/lang.gd")
 const Tactile := preload("res://scripts/tactile.gd")
 const Migration := preload("res://scripts/migration.gd")
+const Voix := preload("res://scripts/voix.gd")
+const Lancement := preload("res://scripts/lancement.gd")
 
 ## Registre des applications du bureau (id = pictogramme, sauf "picto" fourni).
 ## "scene" = lancée directement ; "fenetre" = ouvre la fenêtre-catégorie du même
@@ -38,6 +40,7 @@ const HAUTEUR_BARRE := 76
 const COULEUR_BARRE := Color(0.13, 0.17, 0.28, 0.92)
 const COULEUR_MENU := Color(0.95, 0.72, 0.15)  # bouton Menu jaune soleil
 const COULEUR_ENGRENAGE := Color(0.45, 0.45, 0.50)
+const COULEUR_VOLUME := Color(0.32, 0.58, 0.45)  # bouton haut-parleur vert doux
 
 # Retours sensoriels du bureau (réglages adulte, section Souris)
 const PAS_TRAINEE := 26.0
@@ -53,6 +56,7 @@ const COULEURS_FLEURS: Array[Color] = [
 
 var _menu: PanelContainer
 var _horloge: Label
+var _panneau_volume: PanelContainer = null
 var _fenetres_ouvertes := {}  # id catégorie → instance de Fenetre
 
 var _curseur: Node2D
@@ -74,6 +78,16 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless" \
 			and PinConfig.lire_option("interface", "plein_ecran", false):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	_appliquer_volume(Voix.volume())
+	# Lancement direct « --app <id> » : on saute le bureau et on entre dans l'appli
+	# (icône dédiée sur l'appareil — ex. « Mon classeur » sans passer par CoccOs)
+	var app_directe := Lancement.app_directe()
+	if app_directe != "":
+		var fiche: Dictionary = Registre.appli(app_directe)
+		if not fiche.is_empty() and fiche.has("scene") \
+				and ResourceLoader.exists(fiche["scene"]):
+			get_tree().change_scene_to_file.call_deferred(fiche["scene"])
+			return
 	_appliquer_fond_bureau()
 	_creer_icones()
 	_creer_barre_taches()
@@ -403,6 +417,25 @@ func _creer_barre_taches() -> void:
 	add_child(minuterie)
 	minuterie.start()
 
+	# Haut-parleur (volume, accessible à l'enfant SANS code) — né du 2ᵉ test
+	# d'Isabella : elle voulait monter le son et, sans bouton pour ça, a fini
+	# sur le bouton éteindre. Masquable dans Réglages → Interface.
+	if PinConfig.lire_option("interface", "bouton_volume", true):
+		var btn_volume := Button.new()
+		btn_volume.custom_minimum_size = Vector2(60, 60)
+		UIStyle.styliser(btn_volume, COULEUR_VOLUME, 30)
+		var picto_volume: Control = Pictogramme.new()
+		picto_volume.id = "haut_parleur"
+		picto_volume.set_anchors_preset(Control.PRESET_FULL_RECT)
+		picto_volume.offset_left = 12
+		picto_volume.offset_top = 12
+		picto_volume.offset_right = -12
+		picto_volume.offset_bottom = -12
+		picto_volume.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn_volume.add_child(picto_volume)
+		btn_volume.pressed.connect(_basculer_volume)
+		ligne.add_child(btn_volume)
+
 	# Roue crantée (réglages adulte) — reprend le parcours PIN existant
 	var btn_reglages := Button.new()
 	btn_reglages.custom_minimum_size = Vector2(60, 60)
@@ -438,6 +471,74 @@ func _creer_barre_taches() -> void:
 func _mettre_a_jour_horloge() -> void:
 	var heure := Time.get_time_dict_from_system()
 	_horloge.text = "%02d:%02d" % [heure["hour"], heure["minute"]]
+
+
+# --- Volume de l'enfant -----------------------------------------------------------
+
+## Grande glissière sans chiffres au-dessus de la barre des tâches — un tap sur
+## le haut-parleur l'ouvre, un second la ferme. Un petit pop au relâchement fait
+## entendre le niveau choisi.
+func _basculer_volume() -> void:
+	if _panneau_volume != null:
+		_panneau_volume.queue_free()
+		_panneau_volume = null
+		return
+	var panneau := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = COULEUR_BARRE
+	style.set_corner_radius_all(18)
+	style.content_margin_left = 28.0
+	style.content_margin_right = 28.0
+	style.content_margin_top = 18.0
+	style.content_margin_bottom = 18.0
+	panneau.add_theme_stylebox_override("panel", style)
+
+	var ligne := HBoxContainer.new()
+	ligne.add_theme_constant_override("separation", 18)
+	panneau.add_child(ligne)
+	var picto_doux: Control = Pictogramme.new()
+	picto_doux.id = "haut_parleur"
+	picto_doux.custom_minimum_size = Vector2(34, 34)
+	picto_doux.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ligne.add_child(picto_doux)
+	var glissiere := HSlider.new()
+	glissiere.min_value = 0.0
+	glissiere.max_value = 100.0
+	glissiere.step = 5.0
+	glissiere.custom_minimum_size = Vector2(380, 56)
+	glissiere.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	glissiere.value = Voix.volume()
+	glissiere.value_changed.connect(func(v: float) -> void:
+		PinConfig.ecrire_option("interface", "volume", int(v))
+		_appliquer_volume(int(v)))
+	glissiere.drag_ended.connect(func(changee: bool) -> void:
+		if changee and _lecteurs.has("fleurs"):
+			_lecteurs["fleurs"].play())
+	ligne.add_child(glissiere)
+	var picto_fort: Control = Pictogramme.new()
+	picto_fort.id = "haut_parleur"
+	picto_fort.custom_minimum_size = Vector2(52, 52)
+	picto_fort.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ligne.add_child(picto_fort)
+
+	add_child(panneau)
+	_panneau_volume = panneau
+	# Placement une fois la taille calculée : au-dessus de la barre, côté droit
+	panneau.reset_size()
+	await get_tree().process_frame
+	if _panneau_volume != panneau:
+		return
+	panneau.position = Vector2(size.x - panneau.size.x - 16.0,
+		size.y - HAUTEUR_BARRE - panneau.size.y - 12.0)
+
+
+## Le volume choisi pilote le bus audio maître (sons ET voix enregistrées) ;
+## la synthèse vocale lit la même option (voir voix.gd).
+func _appliquer_volume(v: int) -> void:
+	var lineaire := clampf(v / 100.0, 0.0, 1.0)
+	AudioServer.set_bus_mute(0, v == 0)
+	if v > 0:
+		AudioServer.set_bus_volume_db(0, linear_to_db(lineaire))
 
 
 func _aller_reglages() -> void:

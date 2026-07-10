@@ -18,6 +18,7 @@ const CurseurOS := preload("res://scripts/effets/curseur.gd")
 const Videotheque := preload("res://scripts/tele/videotheque.gd")
 const PinConfig := preload("res://scripts/pin_config.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 
 const COULEUR_BOUTON_QUITTER := Color(0.85, 0.35, 0.30)
 const COULEUR_TELE := Color(0.45, 0.40, 0.85)
@@ -195,7 +196,8 @@ func _creer_bouton_quitter() -> void:
 
 func _quitter() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()

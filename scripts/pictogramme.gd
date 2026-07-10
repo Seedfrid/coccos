@@ -50,6 +50,8 @@ func _draw() -> void:
 			_dessiner_engrenage(c, u)
 		"eteindre":
 			_dessiner_eteindre(c, u)
+		"haut_parleur":
+			_dessiner_haut_parleur(c, u)
 
 
 func _dessiner_souris(c: Vector2, u: float) -> void:
@@ -259,6 +261,17 @@ func _dessiner_eteindre(c: Vector2, u: float) -> void:
 	# Symbole marche/arrêt universel : cercle ouvert en haut + trait vertical
 	draw_arc(c, u * 0.62, deg_to_rad(-55.0), deg_to_rad(235.0), 32, couleur, u * 0.16)
 	draw_line(c + Vector2(0.0, -u * 0.85), c + Vector2(0.0, -u * 0.1), couleur, u * 0.16)
+
+
+func _dessiner_haut_parleur(c: Vector2, u: float) -> void:
+	# Caisson + pavillon + deux ondes — le bouton de volume de l'enfant
+	draw_rect(Rect2(c.x - u * 0.85, c.y - u * 0.26, u * 0.34, u * 0.52), couleur)
+	draw_colored_polygon(PackedVector2Array([
+		c + Vector2(-u * 0.55, -u * 0.26), c + Vector2(-u * 0.12, -u * 0.68),
+		c + Vector2(-u * 0.12, u * 0.68), c + Vector2(-u * 0.55, u * 0.26),
+	]), couleur)
+	draw_arc(c + Vector2(u * 0.02, 0.0), u * 0.38, -PI / 3.2, PI / 3.2, 12, couleur, u * 0.13)
+	draw_arc(c + Vector2(u * 0.02, 0.0), u * 0.68, -PI / 3.2, PI / 3.2, 14, couleur, u * 0.13)
 
 
 func _dessiner_engrenage(c: Vector2, u: float) -> void:

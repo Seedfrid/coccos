@@ -14,6 +14,7 @@ const UIStyle = preload("res://scripts/ui_style.gd")
 const AppliExternes = preload("res://scripts/applis_externes.gd")
 const Registre = preload("res://scripts/registre_jeux.gd")
 const Lang = preload("res://scripts/lang.gd")
+const Raccourcis = preload("res://scripts/raccourcis.gd")
 
 
 func _ready() -> void:
@@ -122,6 +123,18 @@ func _creer_ligne_coccos(appli: Dictionary) -> Control:
 	case_appli.toggled.connect(func(actif: bool) -> void:
 		Registre.activer(id, actif))
 	ligne.add_child(case_appli)
+
+	# ➕ Icône directe sur l'appareil (lancement sans passer par le bureau) —
+	# quand la plateforme sait le faire (Linux ; Windows : posée par l'installeur)
+	if Raccourcis.possible():
+		var btn_icone := Button.new()
+		btn_icone.text = Lang.t("logitheque_btn_raccourci")
+		btn_icone.add_theme_font_size_override("font_size", 20)
+		UIStyle.styliser(btn_icone, Color(0.35, 0.50, 0.65), 12)
+		var nom_appli := Lang.t(appli["nom_cle"])
+		btn_icone.pressed.connect(func() -> void:
+			btn_icone.text = Lang.t(Raccourcis.creer(id, nom_appli)))
+		ligne.add_child(btn_icone)
 	return ligne
 
 

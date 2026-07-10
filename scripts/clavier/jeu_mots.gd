@@ -16,6 +16,7 @@ const Fond := preload("res://scripts/fond.gd")
 const Voix := preload("res://scripts/voix.gd")
 const Tactile := preload("res://scripts/tactile.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 const CHEMIN_CONFIG := "user://config.cfg"
 
 const MOTS_DEFAUT := ["ISABELLA", "PAPA", "MAMAN"]
@@ -372,7 +373,8 @@ func _creer_bouton_quitter() -> void:
 func _quitter() -> void:
 	Voix.arreter(self)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()

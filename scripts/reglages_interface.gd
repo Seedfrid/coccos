@@ -102,6 +102,17 @@ func _ready() -> void:
 		PinConfig.ecrire_option("interface", "mode_tactile", actif))
 	vbox.add_child(case_tactile)
 
+	# --- Bouton de volume enfant (barre des tâches) — cochée par défaut ---
+	var case_volume := CheckBox.new()
+	case_volume.text = " " + Lang.t("interface_bouton_volume")
+	case_volume.add_theme_font_size_override("font_size", 28)
+	for etat in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		case_volume.add_theme_color_override(etat, Color.WHITE)
+	case_volume.button_pressed = PinConfig.lire_option("interface", "bouton_volume", true)
+	case_volume.toggled.connect(func(actif: bool) -> void:
+		PinConfig.ecrire_option("interface", "bouton_volume", actif))
+	vbox.add_child(case_volume)
+
 	# --- Couleur des fenêtres ---
 	vbox.add_child(_creer_sous_titre(Lang.t("interface_couleur_fenetres")))
 

@@ -32,6 +32,7 @@ const CurseurOS := preload("res://scripts/effets/curseur.gd")
 const Banque := preload("res://scripts/classeur/banque.gd")
 const PinGate := preload("res://scripts/pin_gate.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 const CHEMIN_PIN := "res://scenes/pin_gate.tscn"
 
 const MARGE_HAUT := 100.0    # bande des boutons de navigation
@@ -321,7 +322,8 @@ func _creer_bouton_quitter() -> void:
 func _quitter() -> void:
 	Voix.arreter(self)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()

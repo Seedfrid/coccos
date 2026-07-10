@@ -23,6 +23,7 @@ const Lang := preload("res://scripts/lang.gd")
 const Voix := preload("res://scripts/voix.gd")
 const Tactile := preload("res://scripts/tactile.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 
 const CARACTERES_ACCEPTES := "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ"
 ## Caractères spéciaux : affichés dans la bulle ET prononcés par leur nom.
@@ -438,7 +439,8 @@ func _creer_bouton_quitter() -> void:
 func _quitter() -> void:
 	Voix.arreter(self)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()

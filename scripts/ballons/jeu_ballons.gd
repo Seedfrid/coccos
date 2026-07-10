@@ -20,6 +20,7 @@ extends Control
 const Fond := preload("res://scripts/fond.gd")
 const Voix := preload("res://scripts/voix.gd")
 const CHEMIN_BUREAU := "res://scenes/bureau.tscn"
+const Lancement := preload("res://scripts/lancement.gd")
 
 const COULEURS_BALLONS: Array[Color] = [
 	Color(0.95, 0.35, 0.35), Color(1.0, 0.65, 0.2), Color(1.0, 0.85, 0.25),
@@ -250,7 +251,8 @@ func _creer_bouton_quitter() -> void:
 func _quitter() -> void:
 	Voix.arreter(self)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	if ResourceLoader.exists(CHEMIN_BUREAU):
+	# En lancement direct (--app), la croix quitte CoccOs au lieu du retour bureau
+	if Lancement.app_directe() == "" and ResourceLoader.exists(CHEMIN_BUREAU):
 		get_tree().change_scene_to_file(CHEMIN_BUREAU)
 	else:
 		get_tree().quit()
