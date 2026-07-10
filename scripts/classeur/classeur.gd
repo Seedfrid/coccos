@@ -13,7 +13,7 @@
 ##   - accueil : les catégories en grosses tuiles
 ##   - plaquette : la grille de vignettes (positions fidèles au papier école)
 ## Navigation : tuile → plaquette · flèche (haut gauche) → accueil ·
-## maison (haut droit) → bureau · Échap = remonter d'un niveau.
+## croix (haut droit) → bureau · Échap = remonter d'un niveau.
 ##
 ## 🔒 CADENAS (bas gauche, sur une plaquette) : protégé par le code adulte
 ## (pin_gate, action « classeur »). Déverrouillé, les vignettes se DÉPLACENT
@@ -182,7 +182,7 @@ func _montrer_planche(categorie: String) -> void:
 	var zone := Control.new()
 	zone.set_anchors_preset(Control.PRESET_FULL_RECT)
 	# Support de positionnement : transparent aux clics (les vignettes, elles,
-	# sont des Buttons) — sinon la flèche retour et la maison seraient bloquées
+	# sont des Buttons) — sinon la flèche retour et la croix seraient bloquées
 	zone.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_contenu = zone
 	add_child(zone)
@@ -310,7 +310,7 @@ func _creer_bouton_quitter() -> void:
 			style.bg_color = COULEUR_BOUTON_QUITTER.darkened(0.15)
 		style.set_corner_radius_all(36)
 		btn.add_theme_stylebox_override(etat, style)
-	var icone := _IconeMaison.new()
+	var icone := _IconeCroixFermer.new()
 	icone.set_anchors_preset(Control.PRESET_FULL_RECT)
 	icone.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	btn.add_child(icone)
@@ -443,15 +443,15 @@ class _IconeFleche extends Control:
 		]), Color.WHITE)
 
 
-## Petite maison blanche du bouton Quitter (porte = couleur du bouton).
-class _IconeMaison extends Control:
+## Croix blanche du bouton Quitter — « fermer », le geste universel des fenêtres
+## (préférence Freddy 2026-07-09, retour du test d'Isabella : plus parlant que la maison).
+class _IconeCroixFermer extends Control:
 	func _draw() -> void:
 		var centre := size / 2.0
 		var u := minf(size.x, size.y) / 2.0
-		draw_colored_polygon(PackedVector2Array([
-			centre + Vector2(-u * 0.8, 0.05 * u),
-			centre + Vector2(0.0, -u * 0.75),
-			centre + Vector2(u * 0.8, 0.05 * u),
-		]), Color.WHITE)
-		draw_rect(Rect2(centre + Vector2(-u * 0.55, 0.05 * u), Vector2(u * 1.1, u * 0.7)), Color.WHITE)
-		draw_rect(Rect2(centre + Vector2(-u * 0.15, u * 0.3), Vector2(u * 0.3, u * 0.45)), Color(0.85, 0.35, 0.30))
+		var bras := u * 0.42
+		var epaisseur := u * 0.24
+		draw_line(centre + Vector2(-bras, -bras), centre + Vector2(bras, bras), Color.WHITE, epaisseur)
+		draw_line(centre + Vector2(-bras, bras), centre + Vector2(bras, -bras), Color.WHITE, epaisseur)
+		for coin: Vector2 in [Vector2(-bras, -bras), Vector2(bras, -bras), Vector2(-bras, bras), Vector2(bras, bras)]:
+			draw_circle(centre + coin, epaisseur / 2.0, Color.WHITE)

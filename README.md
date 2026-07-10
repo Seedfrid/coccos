@@ -85,4 +85,6 @@ synthèse : déposer des fichiers audio dans le dossier utilisateur
 ---
 
 *CoccOs — un projet libre de Freddy Maillard. Fait avec Godot Engine.*
+*Pensé par Freddy, codé par Claude (Anthropic), dessiné par Gemini (Google) —*
+*chaque part revient à son créateur.*
 *Aucune publicité, aucun traqueur, aucune donnée collectée. 🐞*

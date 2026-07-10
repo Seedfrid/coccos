@@ -9,7 +9,7 @@
 ## Une bulle qui s'échappe par le haut disparaît sans bruit : aucun échec.
 ## Boutons du tableau : flèche = effacer une lettre, croix = tout effacer.
 ##
-## Sortie : bouton maison (haut droit) ou Échap.
+## Sortie : bouton croix (haut droit) ou Échap.
 ## Activité AUTO-CONTENUE (briques chargées depuis le dossier de CE script).
 extends Control
 
@@ -195,15 +195,31 @@ func _input(event: InputEvent) -> void:
 	if event.keycode == KEY_BACKSPACE:
 		_effacer_derniere()
 		return
-	if event.unicode == 0:
+	# Taper une lettre ou un chiffre attrape la plus ancienne bulle qui le porte
+	var caractere := _caractere_de(event)
+	if caractere == "":
 		return
-	# Taper une lettre attrape la plus ancienne bulle qui la porte
-	var caractere := char(event.unicode).to_upper()
 	for bulle in _calque_bulles.get_children():
 		if bulle.lettre == caractere:
 			_attraper(bulle)
 			return
 	# Lettre absente de l'écran : rien — aucune touche ne punit
+
+
+## Le caractère qu'une touche attrape. Les chiffres se lisent à la POSITION de
+## la touche (rangée du haut + pavé numérique) : sur un AZERTY physique, la
+## rangée des chiffres envoie & é " ' ( … sans Maj — par le caractère seul, un
+## enfant ne peut jamais attraper un chiffre (retour du test d'Isabella,
+## 2026-07-09). Le clavier dessiné tactile injecte un unicode déjà correct et
+## passe par le repli.
+static func _caractere_de(event: InputEventKey) -> String:
+	if event.physical_keycode >= KEY_0 and event.physical_keycode <= KEY_9:
+		return String.chr(event.physical_keycode)  # KEY_0..KEY_9 = codes ASCII
+	if event.physical_keycode >= KEY_KP_0 and event.physical_keycode <= KEY_KP_9:
+		return String.num_int64(event.physical_keycode - KEY_KP_0)
+	if event.unicode == 0:
+		return ""
+	return char(event.unicode).to_upper()
 
 
 # --- Le tableau blanc (la récolte) ---------------------------------------------
@@ -326,7 +342,7 @@ func _creer_bouton_quitter() -> void:
 			style.bg_color = COULEUR_BOUTON_QUITTER.darkened(0.15)
 		style.set_corner_radius_all(36)
 		btn.add_theme_stylebox_override(etat, style)
-	var icone := _IconeMaison.new()
+	var icone := _IconeCroixFermer.new()
 	icone.set_anchors_preset(Control.PRESET_FULL_RECT)
 	icone.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	btn.add_child(icone)
@@ -423,15 +439,15 @@ class _IconeCroix extends Control:
 		draw_line(centre + Vector2(-u, u), centre + Vector2(u, -u), Color.WHITE, 6.0)
 
 
-## Petite maison blanche du bouton Quitter (porte = couleur du bouton).
-class _IconeMaison extends Control:
+## Croix blanche du bouton Quitter — « fermer », le geste universel des fenêtres
+## (préférence Freddy 2026-07-09, retour du test d'Isabella : plus parlant que la maison).
+class _IconeCroixFermer extends Control:
 	func _draw() -> void:
 		var centre := size / 2.0
 		var u := minf(size.x, size.y) / 2.0
-		draw_colored_polygon(PackedVector2Array([
-			centre + Vector2(-u * 0.8, 0.05 * u),
-			centre + Vector2(0.0, -u * 0.75),
-			centre + Vector2(u * 0.8, 0.05 * u),
-		]), Color.WHITE)
-		draw_rect(Rect2(centre + Vector2(-u * 0.55, 0.05 * u), Vector2(u * 1.1, u * 0.7)), Color.WHITE)
-		draw_rect(Rect2(centre + Vector2(-u * 0.15, u * 0.3), Vector2(u * 0.3, u * 0.45)), Color(0.85, 0.35, 0.30))
+		var bras := u * 0.42
+		var epaisseur := u * 0.24
+		draw_line(centre + Vector2(-bras, -bras), centre + Vector2(bras, bras), Color.WHITE, epaisseur)
+		draw_line(centre + Vector2(-bras, bras), centre + Vector2(bras, -bras), Color.WHITE, epaisseur)
+		for coin: Vector2 in [Vector2(-bras, -bras), Vector2(bras, -bras), Vector2(-bras, bras), Vector2(bras, bras)]:
+			draw_circle(centre + coin, epaisseur / 2.0, Color.WHITE)
