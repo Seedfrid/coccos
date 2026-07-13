@@ -30,6 +30,8 @@ const APPLIS := [
 		"couleur": Color(0.95, 0.55, 0.15), "scene": "res://scenes/mots.tscn", "categorie": "clavier"},
 	{"id": "chasse", "nom_cle": "bureau_jeu_chasse", "description_cle": "logitheque_desc_chasse",
 		"couleur": Color(0.75, 0.35, 0.75), "scene": "res://scenes/chasse.tscn", "categorie": "clavier"},
+	{"id": "pousse", "nom_cle": "bureau_jeu_pousse", "description_cle": "logitheque_desc_pousse",
+		"couleur": Color(0.60, 0.45, 0.25), "scene": "res://scenes/pousse_pollen.tscn", "categorie": "clavier"},
 	{"id": "classeur", "nom_cle": "bureau_app_classeur", "description_cle": "logitheque_desc_classeur",
 		"couleur": Color(0.90, 0.40, 0.45), "scene": "res://scenes/classeur.tscn", "categorie": ""},
 	{"id": "tele", "nom_cle": "bureau_app_tele", "description_cle": "logitheque_desc_tele",

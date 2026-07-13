@@ -15,7 +15,7 @@ VeilleurIntent="*res://scripts/veilleur_intent.gd"
 [application]
 
 config/name="CoccOs"
-config/version="0.1.28.37"
+config/version="0.1.31.38"
 config/quit_on_go_back=false
 run/main_scene="res://scenes/bureau.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
@@ -36,3 +36,10 @@ window/stretch/aspect="expand"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+
+[input_devices]
+
+; Les boutons tactiles (TouchScreenButton - D-pad de Pousse-Pollen) repondent
+; aussi a la souris sur PC. Sans risque : tactile.gd lit la souris directement
+; (sous option mode_tactile) et nos jeux n'ecoutent pas les ScreenTouch.
+pointing/emulate_touch_from_mouse=true

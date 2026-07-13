@@ -52,6 +52,8 @@ func _draw() -> void:
 			_dessiner_eteindre(c, u)
 		"haut_parleur":
 			_dessiner_haut_parleur(c, u)
+		"pousse":
+			_dessiner_pousse(c, u)
 
 
 func _dessiner_souris(c: Vector2, u: float) -> void:
@@ -261,6 +263,19 @@ func _dessiner_eteindre(c: Vector2, u: float) -> void:
 	# Symbole marche/arrêt universel : cercle ouvert en haut + trait vertical
 	draw_arc(c, u * 0.62, deg_to_rad(-55.0), deg_to_rad(235.0), 32, couleur, u * 0.16)
 	draw_line(c + Vector2(0.0, -u * 0.85), c + Vector2(0.0, -u * 0.1), couleur, u * 0.16)
+
+
+## Boule de pollen poussée vers sa loge (Pousse-Pollen, le jeu de Fabrice).
+func _dessiner_pousse(c: Vector2, u: float) -> void:
+	draw_circle(c + Vector2(-u * 0.25, 0.0), u * 0.5, couleur)
+	for i in 8:
+		var angle := TAU / 8.0 * float(i)
+		draw_circle(c + Vector2(-u * 0.25, 0.0) + Vector2(cos(angle), sin(angle)) * u * 0.52,
+			u * 0.09, couleur)
+	var loge := c + Vector2(u * 0.62, 0.0)
+	var b := u * 0.22
+	draw_line(loge + Vector2(-b, -b), loge + Vector2(b, b), couleur, u * 0.11)
+	draw_line(loge + Vector2(-b, b), loge + Vector2(b, -b), couleur, u * 0.11)
 
 
 func _dessiner_haut_parleur(c: Vector2, u: float) -> void:
